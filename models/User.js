@@ -6,13 +6,12 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   gender: { type: String, required: true },
-  file: { type: String, required: true },
-  isValidated: { type: String },
-  validated: { type: Date, required: true },
+  fileIdentity: { type: String, required: true },
+  isValidated: { type: String, default: "false" },
+  validated: { type: Date, default: "" },
   validatedBy: { type: Schema.Types.ObjectId, ref: "Admin" },
-  created: { type: Date, required: true },
-  deleted: { type: Date, required: true },
-  edited: { type: Date, required: true },
+  created: { type: Date, required: true, default: Date.now },
+  edited: { type: Date, default: "" },
 });
 
 const User = mongoose.model("User", userSchema);

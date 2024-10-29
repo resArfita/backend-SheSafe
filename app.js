@@ -3,6 +3,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const allRoute = require("./routes");
 const db = require("./db");
+const cookieParser = require("cookie-parser");
+
+app.use(cookieParser());
 
 db.then(() => {
   console.log("berhasil connect ke database");
@@ -11,7 +14,7 @@ db.then(() => {
 });
 
 app.listen(PORT, () => {
-  console.log("server running on PORT" + 3000);
+  console.log("server running on PORT " + 3000);
 });
 
 app.use(express.json());
