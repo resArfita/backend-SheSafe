@@ -14,7 +14,7 @@ module.exports = {
 
   addCases: async (req, res) => {
     const { userId } = req.payload;
-    const { title, description, category, message, createdBy } = req.body;
+    const { title, description, category, message } = req.body;
 
     if (!title) {
       return res.json({
@@ -41,6 +41,8 @@ module.exports = {
         category,
         message,
         createdBy: userId,
+        created: new Date(),
+        isApproved: "Submitted",
       });
       await newCases.save();
       res.status(201).json({
@@ -58,6 +60,4 @@ module.exports = {
       });
     }
   },
-
-  approved: async (req, res) => {},
 };

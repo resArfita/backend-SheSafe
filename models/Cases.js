@@ -4,11 +4,12 @@ const Schema = mongoose.Schema;
 const casesSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  isAnonimous: { type: String, Default: "false" },
+  isAnonimous: { type: String },
   category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
   createdBy: { type: Schema.Types.ObjectId, ref: "User" },
   approvedBy: { type: Schema.Types.ObjectId, ref: "Admin" },
-  created: { type: Date, Default: Date.now },
+  created: { type: Date },
+  approved: { type: Date },
   isApproved: { type: String },
   supportCount: { type: String },
   message: { type: String }, // pesan untuk komunitas diisi oleh user bersifat opsional
