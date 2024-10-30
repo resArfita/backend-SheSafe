@@ -7,12 +7,13 @@ const catRoute = require("./category-route");
 const casesRoute = require("./cases-route");
 const adminRoute = require("./admin-route");
 const { validateToken } = require("../middleware/auth");
+const { adminMiddleware } = require("../middleware/admin");
 
 // route.use("/eduShesafe", eduRoute);
 route.use("/auth", authRoute);
 route.use("/community", communityRoute);
 route.use("/cases", validateToken, casesRoute);
-route.use("/category", catRoute);
+route.use("/category", adminMiddleware, catRoute);
 route.use("/admin", adminRoute);
 
 module.exports = route;

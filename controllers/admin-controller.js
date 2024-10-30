@@ -81,7 +81,7 @@ module.exports = {
 
     try {
       const token = jwt.sign(
-        { userId: user._id, fullName: user.fullName, email: user.email },
+        { adminId: user._id, fullName: user.fullName, email: user.email },
         process.env.JWT_KEY,
         { expiresIn: "1h" }
       );

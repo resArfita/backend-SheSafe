@@ -12,6 +12,7 @@ module.exports = {
 
   addCategory: (req, res) => {
     const { name, createdBy } = req.body;
+    const { adminId } = req.payload;
     // Validasi untuk memastikan description dan task diinput
     if (!name) {
       return res.status(400).json({
@@ -19,16 +20,16 @@ module.exports = {
       });
     }
     const newCategory = new Category({
-      name: name,
-      createdBy: createdBy,
+      name,
+      createdBy: adminId,
     });
 
     newCategory.save();
     res.json({
       message: "data berhasil ditambahkan",
       data: {
-        name: name,
-        createdBy: createdBy,
+        name,
+        createdBy,
       },
     });
   },
