@@ -24,19 +24,19 @@ module.exports = {
 
     try {
       const newCases = new Cases({
-        title: title,
-        description: description,
-        category: category.name,
-        message: message,
+        title,
+        description,
+        category,
+        message,
       });
       newCases.save();
       res.status(201).json({
         message: "Berhasil Upload",
         data: {
-          title: title,
-          description: description,
-          category: category.name,
-          message: message,
+          title,
+          description,
+          category,
+          message,
         },
       });
     } catch (error) {
