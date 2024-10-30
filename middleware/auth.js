@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 module.exports = {
   validateToken: (req, res, next) => {
-    const cookie = req.cookies.token;
+    const cookie = req.cookies.usertoken;
 
     if (!cookie) {
       res.status(401).json({
@@ -12,7 +12,7 @@ module.exports = {
       return;
     }
 
-    const token = cookie.split(" ")[1];
+    const token = cookie;
 
     if (!token) {
       res.json("invalid token");

@@ -97,7 +97,7 @@ module.exports = {
         { expiresIn: "1h" }
       );
       res
-        .cookie("token", token, {
+        .cookie("usertoken", token, {
           httpOnly: true,
           secure: false,
           sameSite: true,

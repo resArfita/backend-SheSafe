@@ -1,7 +1,19 @@
 const Cases = require("../models/Cases");
 
 module.exports = {
-  addCases: (req, res) => {
+  getCases: async (req, res) => {
+    const { userId } = req.payload;
+
+    const data = await Cases.find({ createdBy: userId });
+
+    res.json({
+      message: "berhasil mendapatkan data semua user",
+      data,
+    });
+  },
+
+  addCases: async (req, res) => {
+    const { userId } = req.payload;
     const { title, description, category, message, createdBy } = req.body;
 
     if (!title) {
@@ -16,7 +28,7 @@ module.exports = {
       });
     }
 
-    if (!category.name) {
+    if (!category) {
       return res.json({
         message: "Kategori tidak boleh kosong",
       });
@@ -28,8 +40,9 @@ module.exports = {
         description,
         category,
         message,
+        createdBy: userId,
       });
-      newCases.save();
+      await newCases.save();
       res.status(201).json({
         message: "Berhasil Upload",
         data: {
@@ -45,4 +58,6 @@ module.exports = {
       });
     }
   },
+
+  approved: async (req, res) => {},
 };

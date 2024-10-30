@@ -6,8 +6,8 @@ const casesSchema = new mongoose.Schema({
   description: { type: String, required: true },
   isAnonimous: { type: String, Default: "false" },
   category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
-  createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  approvedBy: { type: Schema.Types.ObjectId, ref: "Admin", required: true },
+  createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+  approvedBy: { type: Schema.Types.ObjectId, ref: "Admin" },
   created: { type: Date, Default: Date.now },
   isApproved: { type: String },
   supportCount: { type: String },
@@ -15,7 +15,18 @@ const casesSchema = new mongoose.Schema({
   notes: { type: String }, //notes ini diisi oelh admin ketika approve dan bersifat opsional
 });
 
-const doc = await Parent.findOne().populate("category");
 const Cases = mongoose.model("Cases", casesSchema);
+const findAllCasesWithCategory = async () => {
+  try {
+    const cases = await Cases.find().populate("category");
+    cases.forEach((doc) => {
+      console.log("Case Title:", doc.title);
+      console.log("Category Name:", doc.category.name);
+    });
+  } catch (error) {
+    console.error("Error fetching cases:", error);
+  }
+};
 
+findAllCasesWithCategory();
 module.exports = Cases;
