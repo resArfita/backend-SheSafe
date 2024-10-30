@@ -97,4 +97,10 @@ module.exports = {
       res.status(400).json({ message: "Gagal Login" });
     }
   },
+  logout: (req, res) => {
+    res.clearCookie("token");
+    res.status(200).json({
+      message: "Berhasil logout",
+    });
+  },
 };
