@@ -60,4 +60,65 @@ module.exports = {
       });
     }
   },
+
+  editCases: async (req, res) => {
+    const { userId } = req.payload;
+    const { title, description, category, message, _id } = req.body;
+
+    if (!title) {
+      return res.json({
+        message: "Judul Kasus tidak boleh kosong",
+      });
+    }
+
+    if (!description) {
+      return res.json({
+        message: "Ringkasan Kasus tidak boleh kosong",
+      });
+    }
+
+    if (!category) {
+      return res.json({
+        message: "Kategori tidak boleh kosong",
+      });
+    }
+
+    try {
+      const status = await Cases.findById({ _id });
+
+      if (status.isApproved === "Approved") {
+        return res.status(403).json({
+          message: "Tidak bisa melakukan update karena sudah diapproved",
+        });
+      }
+
+      const updateData = await Cases.findOneAndUpdate(
+        { _id },
+        {
+          title,
+          description,
+          category,
+          message,
+          createdBy: userId,
+        }
+      );
+
+      if (updateData) {
+        res.status(201).json({
+          message: "Berhasil Update",
+          data: {
+            title,
+            description,
+            category,
+            message,
+            createdBy: userId,
+          },
+        });
+      }
+    } catch (error) {
+      res.status(400).json({
+        message: "Gagal upload Pengajuan Kasus",
+      });
+    }
+  },
 };
