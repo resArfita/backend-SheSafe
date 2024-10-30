@@ -93,8 +93,8 @@ module.exports = {
     try {
       const token = jwt.sign(
         { userId: user._id, fullName: user.fullName, email: user.email },
-        process.env.JWT_KEY,
-        { expiresIn: "1h" }
+        process.env.JWT_KEY
+        // { expiresIn: "1h" }
       );
       res
         .cookie("usertoken", token, {
@@ -107,5 +107,12 @@ module.exports = {
     } catch (error) {
       res.status(400).json({ message: "Gagal Login" });
     }
+  },
+
+  logout: (req, res) => {
+    res.clearCookie("usertoken");
+    res.status(200).json({
+      message: "Berhasil logout",
+    });
   },
 };
