@@ -3,6 +3,7 @@ const {
   addCases,
   getCases,
   editCases,
+  deletedCases,
 } = require("../controllers/cases-controller");
 // const { regist, login, getUser } = require("../controllers/auth-controller");
 
@@ -12,6 +13,6 @@ route.post("/", addCases);
 route.get("/", getCases);
 route.get("/:id");
 route.put("/", editCases);
-route.delete("/:id");
+route.delete("/", deletedCases);
 
 module.exports = route;

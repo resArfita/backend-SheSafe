@@ -121,4 +121,23 @@ module.exports = {
       });
     }
   },
+
+  deletedCases: async (req, res) => {
+    const { _id } = req.body;
+    const { userId } = req.payload;
+
+    const deleteByID = await Cases.deleteOne({ _id }, { createdBy: userId });
+
+    try {
+      if (deleteByID) {
+        res.status(200).json({
+          message: "berhasil dihapus",
+        });
+      }
+    } catch (error) {
+      res.status(400).json({
+        message: "gagal",
+      });
+    }
+  },
 };
