@@ -78,17 +78,13 @@ module.exports = {
   login: async (req, res) => {
     const data = req.body;
     const user = await User.findOne({ email: data.email });
-    const isValidated = await User.findOne({
-      isValidated: data.isValidated === "validated",
-    });
 
     //CheckAccount
-    if (!isValidated) {
+    if (user.isValidated !== "validated") {
       return res
         .status(404)
         .json({ message: "Akun anda belum tervalidasi identitasnya" });
     }
-
     // Check email
     if (!user) {
       return res.status(404).json({ message: "Email tidak terdaftar" });

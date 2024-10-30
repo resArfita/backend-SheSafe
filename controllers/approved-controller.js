@@ -1,4 +1,5 @@
 const Cases = require("../models/Cases");
+const User = require("../models/User");
 // const { ObjectId } = require("mongoose").Types;
 
 module.exports = {
@@ -42,27 +43,23 @@ module.exports = {
 
   approvedUser: async (req, res) => {
     // const { id } = req.params;
-    const { isApproved, notes, isAnonimous, _id } = req.body;
+    const { isValidated, _id } = req.body;
     const { adminId } = req.payload;
 
-    const counter = Math.round(Math.random() * 1e9);
-
     try {
-      const updateApprove = await Cases.findOneAndUpdate(
+      const updateValidate = await User.findOneAndUpdate(
         { _id },
         {
-          approvedBy: adminId,
-          isAnonimous: "Anonim" + counter,
-          isApproved,
-          notes,
-          approved: new Date(),
+          validatedBy: adminId,
+          isValidated,
+          validated: new Date(),
         }
       );
 
-      if (updateApprove) {
+      if (updateValidate) {
         res.status(200).json({
-          message: "Approve berhasil",
-          updateApprove,
+          message: "Berhasil Memvalidasi identitas user",
+          updateValidate,
         });
       } else {
         res.status(404).json({
@@ -70,7 +67,7 @@ module.exports = {
         });
       }
     } catch (error) {
-      console.error("Error:", error); // Logging error for debugging
+      console.error("Error:", error);
       res.status(400).json({
         message: "Gagal",
         error: error.message,
