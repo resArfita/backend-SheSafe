@@ -1,7 +1,12 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
-const { regist, login, getUser } = require("../controllers/auth-controller");
+const {
+  regist,
+  login,
+  getUser,
+  logout,
+} = require("../controllers/auth-controller");
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -35,6 +40,8 @@ const upload = multer({
 const route = express.Router();
 route.post("/register", upload.single("fileIdentity"), regist);
 route.post("/login", login);
+route.post("/logout", logout);
+
 route.get("/users", getUser);
 
 module.exports = route;
