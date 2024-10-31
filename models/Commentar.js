@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
-// const Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
 const commentarSchema = new mongoose.Schema({
   created: { type: Date, required: true },
   description: { type: String, required: true },
-  // userID: { type: Schema.Types.ObjectId, ref: "User" },
-  // CasesID: { type: Schema.Types.ObjectId, ref: "Cases" },
+  createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+  casesID: { type: Schema.Types.ObjectId, ref: "Cases" },
+  deleted: { type: Date },
 });
 
 const Commentar = mongoose.model("Commentar", commentarSchema);

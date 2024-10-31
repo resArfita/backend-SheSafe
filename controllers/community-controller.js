@@ -1,32 +1,80 @@
+const Cases = require("../models/Cases");
 const Commentar = require("../models/Commentar");
 
 // Controller untuk menambahkan komentar
-const addCommentar = async (req, res) => {
-  try {
-    const { description } = req.body; // Ambil data dari body permintaan
+module.exports = {
+  getCommunity: async (req, res) => {
+    try {
+      const data = await Cases.find({ isApproved: "Approved" });
 
-    // Validasi input
-    if (!description) {
-      return res.status(400).json({ message: "Description is required" });
+      if (data && data.length > 0) {
+        return res.status(200).json({
+          message: "Berhasil Menampilkan Data",
+          data,
+        });
+      } else {
+        return res.status(404).json({
+          message: "Data tidak ditemukan",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return res.status(500).json({
+        message: "Gagal menampilkan data",
+      });
     }
+  },
 
-    const newCommentar = new Commentar({
-      created: new Date(), // Menetapkan tanggal saat ini
-      description,
-      // userID: req.body.userID, // Uncomment jika userID diperlukan
-      // CasesID: req.body.CasesID, // Uncomment jika CasesID diperlukan
-    });
+  getCommunityById: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = await Cases.find({ _id: id, isApproved: "Approved" });
 
-    await newCommentar.save(); // Simpan komentar baru ke database
+      if (data && data.length > 0) {
+        return res.status(200).json({
+          message: "Berhasil Menampilkan Data",
+          data,
+        });
+      } else {
+        return res.status(404).json({
+          message: "Data tidak ditemukan",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return res.status(500).json({
+        message: "Gagal menampilkan data",
+      });
+    }
+  },
 
-    return res.status(201).json({
-      message: "Commentar created successfully",
-      data: newCommentar,
-    });
-  } catch (error) {
-    console.error("Error creating commentar:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  addCommentar: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { description } = req.body;
+      const { userId } = req.payload;
+
+      // Validasi input
+      if (!description) {
+        return res.status(400).json({ message: "Description is required" });
+      }
+
+      const newCommentar = new Commentar({
+        created: new Date(),
+        description,
+        createdBy: userId,
+        casesID: id,
+      });
+
+      await newCommentar.save();
+
+      return res.status(201).json({
+        message: "Commentar created successfully",
+        data: newCommentar,
+      });
+    } catch (error) {
+      console.error("Error creating commentar:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
 };
-
-module.exports = { addCommentar };

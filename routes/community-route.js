@@ -1,12 +1,16 @@
 const express = require("express");
-const { addCommentar } = require("../controllers/community-controller");
+const {
+  addCommentar,
+  getCommunity,
+  getCommunityById,
+} = require("../controllers/community-controller");
 // const { regist, login, getUser } = require("../controllers/auth-controller");
 
 const route = express.Router();
 
-route.post("/commentar", addCommentar);
-// route.get("/");
-// route.get("/:id");
+route.post("/commentar/:id", addCommentar);
+route.get("/", getCommunity);
+route.get("/:id", getCommunityById);
 // route.put("/:id");
 // route.delete("/:id");
 

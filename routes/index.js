@@ -12,7 +12,7 @@ const { adminMiddleware } = require("../middleware/admin");
 
 // route.use("/eduShesafe", eduRoute);
 route.use("/auth", authRoute);
-route.use("/community", communityRoute);
+route.use("/community", validateToken, communityRoute);
 route.use("/cases", validateToken, casesRoute);
 route.use("/category", adminMiddleware, catRoute);
 route.use("/admin", adminRoute);
