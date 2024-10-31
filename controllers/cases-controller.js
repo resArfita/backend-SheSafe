@@ -12,6 +12,24 @@ module.exports = {
     });
   },
 
+  getCasesById: async (req, res) => {
+    // const { userId } = req.payload;
+
+    try {
+      const { id } = req.params;
+      const data = await Cases.findById({ _id: id });
+
+      res.status(200).json({
+        message: "berhasilmelihat detail",
+        data,
+      });
+    } catch (error) {
+      res.status(404).json({
+        message: "gagal mendapatkan data",
+      });
+    }
+  },
+
   addCases: async (req, res) => {
     const { userId } = req.payload;
     const { title, description, category, message } = req.body;
@@ -124,9 +142,9 @@ module.exports = {
 
   deletedCases: async (req, res) => {
     const { _id } = req.body;
-    const { userId } = req.payload;
+    // const { userId } = req.payload;
 
-    const deleteByID = await Cases.deleteOne({ _id }, { createdBy: userId });
+    const deleteByID = await Cases.deleteOne({ _id });
 
     try {
       if (deleteByID) {
