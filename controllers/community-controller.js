@@ -109,6 +109,14 @@ module.exports = {
       const { id } = req.params;
       const { userId } = req.payload;
       const { count } = req.body;
+
+      const checkSupport = await Support.findOne({ createdBy: userId });
+      if (checkSupport) {
+        return res.json({
+          message: "Anda sudah memberikan dukungan",
+        });
+      }
+
       const newSupport = new Support({
         casesID: id,
         createdBy: userId,
@@ -154,6 +162,13 @@ module.exports = {
     try {
       const { userId } = req.payload;
       const { count, _id } = req.body;
+
+      const checkSupport = await Support.findOne({ createdBy: userId });
+      if (checkSupport) {
+        return res.json({
+          message: "Anda sudah memberikan dukungan",
+        });
+      }
       const newSupport = new Support({
         casesID: _id,
         createdBy: userId,
