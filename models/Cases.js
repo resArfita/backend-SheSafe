@@ -11,7 +11,7 @@ const casesSchema = new mongoose.Schema({
   created: { type: Date },
   approved: { type: Date },
   isApproved: { type: String },
-  supportCount: { type: String },
+  supportCounter: { type: Number },
   message: { type: String }, // pesan untuk komunitas diisi oleh user bersifat opsional
   notes: { type: String }, //notes ini diisi oelh admin ketika approve dan bersifat opsional
 });
