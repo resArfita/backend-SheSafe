@@ -4,6 +4,7 @@ const eduRoute = require("./edu-route");
 const authRoute = require("./auth-route");
 const journalRoute = require("./journal-route");
 const userRoute = require("./user-route")
+const { validateToken } = require("../middleware/auth")
 
 route.get("/", (req, res) => {
   res.json({
@@ -11,9 +12,9 @@ route.get("/", (req, res) => {
   });
 });
 
-route.use("/eduShesafe", eduRoute);
 route.use("/auth", authRoute);
-route.use("/journal", journalRoute);
-route.use("/users", userRoute);
+route.use("/journal", validateToken, journalRoute);
+route.use("/users", validateToken, userRoute); //check user dari admin role
+route.use("/eduShesafe", eduRoute);
 
 module.exports = route;
