@@ -6,7 +6,9 @@ const Support = require("../models/Support");
 module.exports = {
   getCommunity: async (req, res) => {
     try {
-      const data = await Cases.find({ isApproved: "Approved" });
+      const data = await Cases.find({ isApproved: "Approved" }).sort({
+        approved: "desc",
+      });
 
       if (data && data.length > 0) {
         return res.status(200).json({
@@ -82,9 +84,12 @@ module.exports = {
   getCommentar: async (req, res) => {
     try {
       const { id } = req.params;
-      const commentar = await Commentar.find({ caseId: id }).populate(
-        createdBy
-      );
+      const commentar = await Commentar.find({ caseId: id })
+        .populate(createdBy)
+        .sort({
+          created: "desc",
+        });
+
       if (commentar) {
         res.status(200).json({
           message: "berhasil menampilan commentar",

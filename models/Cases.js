@@ -17,17 +17,5 @@ const casesSchema = new mongoose.Schema({
 });
 
 const Cases = mongoose.model("Cases", casesSchema);
-const findAllCasesWithCategory = async () => {
-  try {
-    const cases = await Cases.find().populate("category");
-    cases.forEach((doc) => {
-      console.log("Case Title:", doc.title);
-      console.log("Category Name:", doc.category.name);
-    });
-  } catch (error) {
-    console.error("Error fetching cases:", error);
-  }
-};
 
-findAllCasesWithCategory();
 module.exports = Cases;
