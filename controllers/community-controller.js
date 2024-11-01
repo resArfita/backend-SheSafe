@@ -161,7 +161,7 @@ module.exports = {
   addSupport: async (req, res) => {
     try {
       const { userId } = req.payload;
-      const { count, _id } = req.body;
+      const { count, id } = req.body;
 
       const checkSupport = await Support.findOne({ createdBy: userId });
       if (checkSupport) {
@@ -170,7 +170,7 @@ module.exports = {
         });
       }
       const newSupport = new Support({
-        casesID: _id,
+        casesID: id,
         createdBy: userId,
         created: new Date(),
         count,
@@ -205,6 +205,88 @@ module.exports = {
       }
     } catch (error) {
       console.error("Error creating support:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  deleteSupport: async (req, res) => {
+    try {
+      const { userId } = req.payload;
+      const { id } = req.body;
+
+      // Menghapus dukungan berdasarkan casesID dan createdBy
+      const deleteSupport = await Support.deleteOne({
+        casesID: id,
+        createdBy: userId,
+      });
+
+      // Memastikan dukungan telah dihapus
+      if (deleteSupport.deletedCount === 0) {
+        return res.status(404).json({
+          message: "Dukungan tidak ditemukan atau sudah dihapus.",
+        });
+      }
+
+      // Menghitung total dukungan yang tersisa
+      const dataSupport = await Support.countDocuments();
+
+      // Memperbarui supportCounter pada model Cases
+      const updateSupport = await Cases.findOneAndUpdate(
+        { _id: id },
+        {
+          supportCounter: dataSupport,
+        },
+        { new: true }
+      );
+
+      // Mengirimkan respons setelah semua operasi selesai
+      return res.status(200).json({
+        message: "Berhasil menghapus Dukungan",
+        supportCounter: updateSupport.supportCounter,
+      });
+    } catch (error) {
+      console.error("Error deleting support:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  deleteSupportById: async (req, res) => {
+    try {
+      const { userId } = req.payload;
+      const { id } = req.params;
+
+      // Menghapus dukungan berdasarkan casesID dan createdBy
+      const deleteSupport = await Support.deleteOne({
+        casesID: id,
+        createdBy: userId,
+      });
+
+      // Memastikan dukungan telah dihapus
+      if (deleteSupport.deletedCount === 0) {
+        return res.status(404).json({
+          message: "Dukungan tidak ditemukan atau sudah dihapus.",
+        });
+      }
+
+      // Menghitung total dukungan yang tersisa
+      const dataSupport = await Support.countDocuments();
+
+      // Memperbarui supportCounter pada model Cases
+      const updateSupport = await Cases.findOneAndUpdate(
+        { _id: id },
+        {
+          supportCounter: dataSupport,
+        },
+        { new: true }
+      );
+
+      // Mengirimkan respons setelah semua operasi selesai
+      return res.status(200).json({
+        message: "Berhasil menghapus Dukungan",
+        supportCounter: updateSupport.supportCounter,
+      });
+    } catch (error) {
+      console.error("Error deleting support:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   },
