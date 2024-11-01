@@ -14,7 +14,7 @@ module.exports = {
   },
 
   regist: async (req, res) => {
-    const { fullName, email, gender, password } = req.body;
+    const { fullName, email, gender, password, birthDate } = req.body;
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -33,6 +33,10 @@ module.exports = {
 
     if (!password) {
       return res.json({ message: "password tidak boleh kosong" });
+    }
+
+    if (!birthDate) {
+      return res.json({ message: "tanggal lahir tidak boleh kosong" });
     }
 
     if (!req.file) {
@@ -54,6 +58,7 @@ module.exports = {
         fullName,
         email,
         gender,
+        birthDate,
         fileIdentity: req.file.path,
         password: hashedPassword, // Use hashed password
       });

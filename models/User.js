@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   gender: { type: String, required: true },
+  birthDate: { type: Date, required: true },
   fileIdentity: { type: String, required: true },
   isValidated: { type: String, default: "false" },
   validated: { type: Date, default: "" },
