@@ -2,7 +2,7 @@ const Cases = require("../models/Cases");
 
 module.exports = {
   getCases: async (req, res) => {
-    const { userId } = req.payload;
+    const { userId } = req.user;
 
     const data = await Cases.find({ createdBy: userId });
 
@@ -13,7 +13,7 @@ module.exports = {
   },
 
   getCasesById: async (req, res) => {
-    // const { userId } = req.payload;
+    // const { userId } = req.user;
 
     try {
       const { id } = req.params;
@@ -31,7 +31,7 @@ module.exports = {
   },
 
   addCases: async (req, res) => {
-    const { userId } = req.payload;
+    const { userId } = req.user;
     const { title, description, category, message } = req.body;
 
     if (!title) {
@@ -81,7 +81,7 @@ module.exports = {
 
   editCases: async (req, res) => {
     const { id } = req.paramas;
-    const { userId } = req.payload;
+    const { userId } = req.user;
     const { title, description, category, message } = req.body;
 
     if (!title) {
@@ -143,7 +143,7 @@ module.exports = {
 
   deletedCases: async (req, res) => {
     const { _id } = req.body;
-    // const { userId } = req.payload;
+    // const { userId } = req.user;
 
     const deleteByID = await Cases.deleteOne({ _id });
 

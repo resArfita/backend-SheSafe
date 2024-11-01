@@ -19,7 +19,7 @@ module.exports = {
 
     try {
       const payload = jwt.verify(token, process.env.JWT_KEY);
-      req.payload = payload;
+      req.admin = payload;
       next();
     } catch (error) {
       console.error("Token verification error:", error);

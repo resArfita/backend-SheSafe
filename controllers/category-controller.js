@@ -12,7 +12,7 @@ module.exports = {
 
   addCategory: (req, res) => {
     const { name, createdBy } = req.body;
-    const { adminId } = req.payload;
+    const { adminId } = req.admin;
     // Validasi untuk memastikan description dan task diinput
     if (!name) {
       return res.status(400).json({

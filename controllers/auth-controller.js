@@ -4,6 +4,13 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 module.exports = {
+  checkAuth: (req, res) => {
+    if (req.user) {
+      return res.status(200).json({ isAuthenticated: true, user: req.user });
+    }
+    return res.status(401).json({ isAuthenticated: false });
+  },
+
   getUser: async (req, res) => {
     const data = await User.find({});
 

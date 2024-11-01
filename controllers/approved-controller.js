@@ -8,7 +8,7 @@ module.exports = {
   approvedCases: async (req, res) => {
     // const { id } = req.params;
     const { isApproved, notes, isAnonimous, _id } = req.body;
-    const { adminId } = req.payload;
+    const { adminId } = req.admin;
 
     const counter = Math.round(Math.random() * 1e9);
 
@@ -46,7 +46,7 @@ module.exports = {
   approvedUser: async (req, res) => {
     // const { id } = req.params;
     const { isValidated, _id } = req.body;
-    const { adminId } = req.payload;
+    const { adminId } = req.admin;
 
     try {
       const updateValidate = await User.findOneAndUpdate(
