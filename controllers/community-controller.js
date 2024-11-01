@@ -6,14 +6,36 @@ const Support = require("../models/Support");
 module.exports = {
   getCommunity: async (req, res) => {
     try {
-      const data = await Cases.find({ isApproved: "Approved" }).sort({
-        approved: "desc",
-      });
+      const Category = req.query.Category || "";
+      const currentPage = req.query.page || 1;
+      const perPage = req.query.perPage || 6;
+
+      let filter = { isApproved: "Approved" };
+      if (Category) {
+        filter.Category = Category;
+      }
+
+      let totalData;
+
+      const countData = await Cases.find(filter).countDocuments();
+
+      totalData = countData;
+
+      const data = await Cases.find(filter)
+        .sort({
+          approved: "desc",
+        })
+        // .populate(category)
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
 
       if (data && data.length > 0) {
         return res.status(200).json({
           message: "Berhasil Menampilkan Data",
           data,
+          total_data: totalData,
+          per_page: perPage,
+          current_page: currentPage,
         });
       } else {
         return res.status(404).json({
@@ -84,13 +106,13 @@ module.exports = {
   getCommentar: async (req, res) => {
     try {
       const { id } = req.params;
-      const commentar = await Commentar.find({ caseId: id })
-        .populate(createdBy)
+      const commentar = await Commentar.find({ casesID: id })
+        .populate("createdBy")
         .sort({
           created: "desc",
         });
 
-      if (commentar) {
+      if (commentar && commentar.length > 0) {
         res.status(200).json({
           message: "berhasil menampilan commentar",
           commentar,
