@@ -1,18 +1,32 @@
 const Cases = require("../models/Cases");
 const Commentar = require("../models/Commentar");
+const Category = require("../models/Category");
+
 const Support = require("../models/Support");
 
 // Controller untuk menambahkan komentar
 module.exports = {
   getCommunity: async (req, res) => {
     try {
-      const Category = req.query.Category || "";
-      const currentPage = req.query.page || 1;
-      const perPage = req.query.perPage || 6;
+      const CategoryName = req.query.category
+        ? decodeURIComponent(req.query.category)
+        : "";
+      const currentPage = parseInt(req.query.page) || 1;
+      const perPage = parseInt(req.query.perPage) || 6;
 
       let filter = { isApproved: "Approved" };
-      if (Category) {
-        filter.Category = Category;
+
+      let categoryId;
+      if (CategoryName) {
+        const category = await Category.find({ name: CategoryName });
+        if (category.length > 0) {
+          categoryId = category[0]._id;
+          filter.category = categoryId;
+        } else {
+          res.status(400).json({
+            message: "Kategori tidak ditemukan",
+          });
+        }
       }
 
       let totalData;
@@ -25,7 +39,7 @@ module.exports = {
         .sort({
           approved: "desc",
         })
-        // .populate(category)
+        .populate("category", "name")
         .skip((currentPage - 1) * perPage)
         .limit(perPage);
 
