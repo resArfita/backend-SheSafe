@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const commentarSchema = new mongoose.Schema({
+const supportSchema = new mongoose.Schema({
   created: { type: Date },
-  description: { type: String, required: true },
+  count: { type: Number },
   createdBy: { type: Schema.Types.ObjectId, ref: "User" },
   casesID: { type: Schema.Types.ObjectId, ref: "Cases" },
   deleted: { type: Date },
 });
 
-const Commentar = mongoose.model("Commentar", commentarSchema);
+const Support = mongoose.model("Support", supportSchema);
 
-module.exports = Commentar;
+module.exports = Support;

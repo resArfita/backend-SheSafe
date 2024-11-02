@@ -1,17 +1,18 @@
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 const allRoute = require("./routes");
 const db = require("./db");
 
 db.then(() => {
   console.log("berhasil connect ke database");
-}).catch(() => {
+}).catch((e) => {
   console.log("gagal connect ke database");
+  console.log(e)
 });
 
 app.listen(PORT, () => {
-  console.log("server running on PORT" + 3000);
+  console.log("server running on PORT " + PORT);
 });
 
 app.use(express.json());
