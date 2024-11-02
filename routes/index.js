@@ -14,7 +14,7 @@ route.get("/", (req, res) => {
 
 route.use("/auth", authRoute);
 route.use("/journal", validateToken, journalRoute);
-route.use("/users", validateToken, userRoute); //check user dari admin role
+route.use("/users", validateToken, userRoute);
 route.use("/eduShesafe", eduRoute);
 
 module.exports = route;
