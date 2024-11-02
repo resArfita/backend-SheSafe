@@ -4,9 +4,16 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 module.exports = {
+  checkAuth: (req, res) => {
+    if (req.user) {
+      return res.status(200).json({ isAuthenticated: true, user: req.user });
+    }
+    return res.status(401).json({ isAuthenticated: false });
+  },
+
   regist: async (req, res) => {
     // const data = req.body
-    const { fullName, email, gender, password } = req.body;
+    const { fullName, email, gender, password, birthDate } = req.body; //tambahbirthDate
 
     // Validasi input
     if (!fullName) {
@@ -23,6 +30,10 @@ module.exports = {
 
     if (!password) {
       return res.json({ message: "password tidak boleh kosong" });
+    }
+
+    if (!birthDate) {
+      return res.json({ message: "tanggal lahir tidak boleh kosong" });
     }
 
     if (!req.file) {
@@ -48,6 +59,7 @@ module.exports = {
         fullName,
         email,
         gender,
+        birthDate,
         fileIdentity: req.file.path,
         password: hashedPassword, // Use hashed password
       });

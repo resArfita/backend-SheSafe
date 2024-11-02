@@ -4,8 +4,9 @@ const path = require("path");
 const {
   regist,
   login,
-  getUser,
+  // getUser,
   logout,
+  checkAuth,
 } = require("../controllers/auth-controller");
 
 // Set up multer for file uploads
@@ -43,5 +44,6 @@ route.post("/login", login);
 route.post("/logout", logout);
 
 // route.get("/users", getUser);
+route.get("/check", checkAuth);
 
 module.exports = route;

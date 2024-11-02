@@ -91,7 +91,7 @@ module.exports = {
     try {
       const { id } = req.params;
       const { description } = req.body;
-      const { userId } = req.payload;
+      const { userId } = req.user;
 
       // Validasi input
       if (!description) {
@@ -148,7 +148,7 @@ module.exports = {
   addSupportById: async (req, res) => {
     try {
       const { id } = req.params;
-      const { userId } = req.payload;
+      const { userId } = req.user;
       const { count } = req.body;
 
       const checkSupport = await Support.findOne({ createdBy: userId });
@@ -201,7 +201,7 @@ module.exports = {
   //ini dari halaman beranda komunitas
   addSupport: async (req, res) => {
     try {
-      const { userId } = req.payload;
+      const { userId } = req.user;
       const { count, id } = req.body;
 
       const checkSupport = await Support.findOne({ createdBy: userId });
@@ -252,7 +252,7 @@ module.exports = {
 
   deleteSupport: async (req, res) => {
     try {
-      const { userId } = req.payload;
+      const { userId } = req.user;
       const { id } = req.body;
 
       // Menghapus dukungan berdasarkan casesID dan createdBy
@@ -293,7 +293,7 @@ module.exports = {
 
   deleteSupportById: async (req, res) => {
     try {
-      const { userId } = req.payload;
+      const { userId } = req.user;
       const { id } = req.params;
 
       // Menghapus dukungan berdasarkan casesID dan createdBy

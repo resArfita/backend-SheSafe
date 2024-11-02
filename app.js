@@ -4,6 +4,25 @@ const PORT = process.env.PORT || 3000;
 const allRoute = require("./routes");
 const db = require("./db");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
+
+app.use(cors());
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Ganti '*' dengan domain frontend jika perlu (misalnya, 'http://localhost:3001')
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  next();
+});
+
+//kalau dideploy pake ini yak
+// app.use(cors({
+//   origin: 'https://domain-frontend-anda.com',
+//   methods: 'GET, POST, PUT, DELETE, OPTIONS',
+//   allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+// }));
 
 app.use(cookieParser());
 
