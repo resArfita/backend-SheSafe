@@ -1,6 +1,8 @@
 const express = require("express");
 const route = express.Router();
 
+const userRoute = require("./user-route");
+const journalRoute = require("./journal-route");
 const communityRoute = require("./community-route");
 const authRoute = require("./auth-route");
 const catRoute = require("./category-route");
