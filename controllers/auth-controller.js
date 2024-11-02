@@ -83,12 +83,6 @@ module.exports = {
 
   login: async (req, res) => {
     const data = req.body;
-    //CheckAccount
-    if (user.isValidated !== "validated") {
-      return res
-        .status(404)
-        .json({ message: "Akun anda belum tervalidasi identitasnya" });
-    }
 
     //check if the user exist in db
     const user = await User.findOne({ email: data.email }).exec();
@@ -96,6 +90,13 @@ module.exports = {
       return res.json({
         message: "Gagal login, apakah kamu sudah registrasi ?",
       });
+
+    //CheckAccount
+    if (user.isValidated !== "validated") {
+      return res
+        .status(404)
+        .json({ message: "Akun anda belum tervalidasi identitasnya" });
+    }
 
     //if user exist -> compare pass w/ bcrypt
     const checkPassword = await bcrypt.compare(data.password, user.password);
