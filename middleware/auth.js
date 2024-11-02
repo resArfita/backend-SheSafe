@@ -21,7 +21,7 @@ module.exports = {
 
     try {
       const payload = jwt.verify(token, process.env.JWT_KEY);
-      req.payload = payload;
+      req.user = payload;
       next();
     } catch {
       res.status(400).json({

@@ -42,6 +42,6 @@ route.post("/register", upload.single("fileIdentity"), regist);
 route.post("/login", login);
 route.post("/logout", logout);
 
-route.get("/users", getUser);
+// route.get("/users", getUser);
 
 module.exports = route;

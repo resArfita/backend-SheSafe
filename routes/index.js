@@ -10,8 +10,15 @@ const approvedRoute = require("./approved-route");
 const { validateToken } = require("../middleware/auth");
 const { adminMiddleware } = require("../middleware/admin");
 
+route.get("/", (req, res) => {
+  res.json({
+    message: "selamat datang di SHESAFE datasets",
+  });
+});
 // route.use("/eduShesafe", eduRoute);
 route.use("/auth", authRoute);
+route.use("/users", validateToken, userRoute);
+route.use("/journal", validateToken, journalRoute);
 route.use("/community", validateToken, communityRoute);
 route.use("/cases", validateToken, casesRoute);
 route.use("/category", adminMiddleware, catRoute);

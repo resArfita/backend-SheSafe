@@ -1,24 +1,14 @@
 require("dotenv").config();
+const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
 
 module.exports = {
-  getUser: async (req, res) => {
-    const data = await User.find({});
-
-    res.json({
-      message: "berhasil mendapatkan data semua user",
-      data,
-    });
-  },
-
   regist: async (req, res) => {
+    // const data = req.body
     const { fullName, email, gender, password } = req.body;
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Validasi field
+    // Validasi input
     if (!fullName) {
       return res.json({ message: "fullname tidak boleh kosong" });
     }
@@ -39,6 +29,11 @@ module.exports = {
       return res.json({ message: "Bukti Identitas tidak boleh kosong" });
     }
 
+    //password hashing
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // console.log(data)
+
     try {
       // Cek apakah email sudah digunakan
       const checkEmail = await User.findOne({ email });
@@ -49,7 +44,6 @@ module.exports = {
         });
       }
 
-      // Simpan user baru
       const newUser = new User({
         fullName,
         email,
@@ -77,48 +71,49 @@ module.exports = {
 
   login: async (req, res) => {
     const data = req.body;
-    const user = await User.findOne({ email: data.email });
-
     //CheckAccount
     if (user.isValidated !== "validated") {
       return res
         .status(404)
         .json({ message: "Akun anda belum tervalidasi identitasnya" });
     }
-    // Check email
-    if (!user) {
-      return res.status(404).json({ message: "Email tidak terdaftar" });
-    }
 
-    // Check password
+    //check if the user exist in db
+    const user = await User.findOne({ email: data.email }).exec();
+    if (!user)
+      return res.json({
+        message: "Gagal login, apakah kamu sudah registrasi ?",
+      });
+
+    //if user exist -> compare pass w/ bcrypt
     const checkPassword = await bcrypt.compare(data.password, user.password);
-    if (!checkPassword) {
-      return res.json({ message: "User Gagal Login" });
-    }
+    if (!checkPassword) return res.json({ message: "Gagal login" });
 
+    //token
     try {
       const token = jwt.sign(
-        { userId: user._id, fullName: user.fullName, email: user.email },
-        process.env.JWT_KEY
-        // { expiresIn: "1h" }
+        { userId: user._id, fullName: user.fullName, email: user.email }, //payload
+        process.env.JWT_KEY //secretkey
       );
-      res
-        .cookie("usertoken", token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: true,
-        })
-        .status(201)
-        .json({ message: "User Berhasil Login" });
+
+      res.cookie("tokenUser", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: true,
+        // { expiresIn: "1h" }
+      });
+
+      res.status(201).json({
+        message: "Berhasil login",
+        token,
+      });
     } catch (error) {
       res.status(400).json({ message: "Gagal Login" });
     }
   },
 
   logout: (req, res) => {
-    res.clearCookie("usertoken");
-    res.status(200).json({
-      message: "Berhasil logout",
-    });
+    res.clearCookie("tokenUser");
+    res.status(201).json({ message: "berhasil Logout" });
   },
 };
