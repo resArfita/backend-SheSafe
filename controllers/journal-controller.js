@@ -44,7 +44,7 @@ module.exports = {
   // Vita: tambah kondisi createdBy dari payload req.user
   addJournal: (req, res) => {
     const data = req.body;
-    const { userId } = req.userId;
+    const { userId } = req.user;
 
     //check if file uploaded
     if (req.file) {
