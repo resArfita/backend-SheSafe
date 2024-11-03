@@ -69,7 +69,80 @@ module.exports = {
       });
     }
   },
+  // Fungsi untuk mendapatkan semua kasus dengan pagination dan status
+  getAllCasesPaginationStatus: async (req, res) => {
+    const { status = "", page = 1, limit = 10 } = req.query;
 
+    try {
+      const cases = await Cases.find(status ? { isApproved: status } : {})
+        .sort({ created: "desc" })
+        .skip((page - 1) * limit)
+        .limit(Number(limit));
+
+      const totalCases = await Cases.countDocuments(status ? { isApproved: status } : {});
+
+      res.status(200).json({
+        message: "Berhasil mendapatkan semua kasus",
+        totalCases,
+        totalPages: Math.ceil(totalCases / limit),
+        currentPage: page,
+        cases,
+      });
+    } catch (error) {
+      console.error("Error getting cases with status filter", error);
+      res.status(500).json({
+        message: "Gagal mendapatkan kasus",
+        error: error.message,
+      });
+    }
+  },
+  // Fungsi untuk mendapatkan semua kasus dengan filter nama kategori dan paginasi
+  getCasesByCategoryName: async (req, res) => {
+    const { categoryName, page = 1, limit = 10 } = req.query;
+
+    if (!categoryName) {
+      return res.status(400).json({
+        message: "Nama kategori harus disediakan sebagai query parameter",
+      });
+    }
+
+    try {
+      const category = await category.findOne({ name: categoryName });
+
+      if (!category) {
+        return res.status(404).json({
+          message: `Kategori dengan nama "${categoryName}" tidak ditemukan`,
+        });
+      }
+
+      const totalCases = await Cases.countDocuments({ category: category._id });
+
+      const totalPages = Math.ceil(totalCases / limit);
+
+      const cases = await Cases.find({ category: category._id })
+        .populate("category", "name") 
+        .sort({ created: "desc" })
+        .skip((page - 1) * limit)
+        .limit(Number(limit));
+
+      res.status(200).json({
+        message: "Berhasil mendapatkan semua kasus dengan filter kategori",
+        data: cases,
+        pagination: {
+          totalCases,
+          totalPages,
+          currentPage: Number(page),
+          limit: Number(limit),
+        },
+      });
+    } catch (error) {
+      console.error("Error searching cases by category:", error);
+      res.status(500).json({
+        message: "Gagal mencari kasus berdasarkan kategori",
+        error: error.message,
+      });
+    }
+  },
   addCases: async (req, res) => {
     const { userId } = req.user;
     const { title, description, category, message, journalID } = req.body;

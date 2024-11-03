@@ -78,35 +78,64 @@ module.exports = {
         })
     },
     editUserProfile: async (req, res) => {
-        const { id } = req.params;
-
-        const user = await User.findById(id);
-        if (!user) {
-            return res.status(404).json({ message: "User tidak ditemukan" });
-        }
-
-        const updatedData = {
-            fullName: req.body.fullName || user.fullName, 
-            edited: new Date(), 
-        };
-    
-        if (req.file) {
-            console.log("File uploaded: ", req.file);
-            updatedData.avatar = `/userID-assets/${req.file.filename}`; 
-        }
-    
         try {
+            const { id } = req.params;
+
+            const user = await User.findById(id);
+            if (!user) {
+                return res.status(404).json({ message: "User tidak ditemukan" });
+            }
+
+            const updatedData = {
+                fullName: req.body.fullName || user.fullName,
+                edited: new Date(),
+            };
+
+            if (req.file) {
+                console.log("File uploaded: ", req.file);
+                updatedData.avatar = `/userID-assets/${req.file.filename}`;
+            }
+
             const updatedUser = await User.findByIdAndUpdate(id, updatedData, { new: true });
             res.json({
                 message: "Berhasil mengupdate profil",
                 updatedUser,
             });
         } catch (error) {
-            console.error("Error updating user data", error);
+            console.error("Error updating user profile:", error);
             res.status(500).json({
                 message: "Gagal mengupdate profil",
                 error: error.message,
             });
         }
     },
+    getAllUsersPagination: async (req, res) => {
+        try {
+            const { page = 1, limit = 10 } = req.query; 
+
+            const skip = (page - 1) * limit;
+
+            const users = await User.find().skip(skip).limit(limit);
+            const totalUsers = await User.countDocuments(); 
+
+            const totalPages = Math.ceil(totalUsers / limit);
+
+            res.json({
+                message: "Berhasil mendapatkan daftar pengguna",
+                data: users,
+                pagination: {
+                    totalUsers,
+                    totalPages,
+                    currentPage: Number(page),
+                    limit: Number(limit)
+                }
+            });
+        } catch (error) {
+            console.error("Error fetching users with pagination:", error);
+            res.status(500).json({
+                message: "Gagal mendapatkan pengguna",
+                error: error.message,
+            });
+        }
+    }
 }

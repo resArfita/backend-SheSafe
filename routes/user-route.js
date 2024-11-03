@@ -1,6 +1,6 @@
 const express = require("express")
 const route = express.Router()
-const { getAllUser, getUserById, addUser, deleteUser, editUser, editUserProfile } = require("../controllers/user-controller")
+const { getAllUser, getUserById, addUser, deleteUser, editUser, editUserProfile, getAllUsersPagination } = require("../controllers/user-controller")
 const multer = require("multer")
 const path = require("path")
 
@@ -35,6 +35,7 @@ const upload = multer({
 
 
 route.get("/", getAllUser) //get User
+route.get("/page", getAllUsersPagination) //get All User Pagination
 route.get("/:id", getUserById) //get User by id
 route.post("/", upload.single("file"), addUser) //add User
 route.put("/:id", upload.single("file"), editUser) //edit user

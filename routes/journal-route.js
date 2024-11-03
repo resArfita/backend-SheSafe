@@ -39,7 +39,7 @@ route.get("/:id", getDetailJournal) //get Detail journal by id
 route.post("/", upload.single("file"), addJournal) //add Journal
 route.put("/:id", upload.single("file"), editJournal) //edit journal
 route.delete("/:id", deleteJournal) //delete by id
-route.get("/pag", getAllJournalsPagination) //Journal pagination, sorting
+route.get("/page", getAllJournalsPagination) //Journal pagination, sorting
 route.get("/category", getJournalsPaginationByCategory); // journals by category name, pagination
 route.get("/category/sort", getJournalByCategoryAndSort); // journals by category name, sorting, pagination
 
