@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const route = express.Router();
 const {
@@ -9,14 +10,22 @@ const {
 } = require("../controllers/journal-controller");
 const multer = require("multer");
 const path = require("path");
+const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "journal-assets");
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + path.extname(file.originalname); //buat generate unique file name
-    cb(null, uniqueName);
+// Konfigurasi Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+
+// Konfigurasi Multer-Storage-Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "journal",
+    public_id: (req, file) => Date.now() + path.extname(file.originalname),
   },
 });
 

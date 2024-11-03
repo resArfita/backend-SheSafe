@@ -50,7 +50,7 @@ module.exports = {
     // Check if file uploaded
     if (req.file) {
       console.log("File uploaded: ", req.file);
-      data.file = `/journal-assets/${req.file.filename}`;
+      data.file = `${req.file.filename}`;
     } else {
       console.log("No file uploaded");
     }
@@ -173,7 +173,7 @@ module.exports = {
 
     if (req.file) {
       console.log("File uploaded: ", req.file);
-      editData.file = `/journal-assets/${req.file.filename}`;
+      editData.file = `${req.file.filename}`;
     }
 
     const updatedJournal = await Journal.findByIdAndUpdate(id, editData, {
