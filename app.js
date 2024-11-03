@@ -14,6 +14,9 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
+  res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.header("Pragma", "no-cache");
+  res.header("Expires", "0");
   next();
 });
 
@@ -30,7 +33,7 @@ db.then(() => {
   console.log("berhasil connect ke database");
 }).catch((e) => {
   console.log("gagal connect ke database");
-  console.log(e)
+  console.log(e);
 });
 
 app.listen(PORT, () => {

@@ -6,7 +6,7 @@ const nodemailer = require("nodemailer");
 
 module.exports = {
   getDataCases: async (req, res) => {
-    const data = await Cases.find([]);
+    const data = await Cases.find({});
     res.status(200).json({
       message: "berhasil mendapatkan data",
       data,
@@ -14,7 +14,7 @@ module.exports = {
   },
 
   getDataUser: async (req, res) => {
-    const data = await User.find([]);
+    const data = await User.find({});
     res.status(200).json({
       message: "berhasil mendapatkan data",
       data,
