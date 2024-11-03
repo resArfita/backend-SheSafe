@@ -1,80 +1,82 @@
-const User = require("../models/User")
+const User = require("../models/User");
 
 module.exports = {
-    getAllUser: async (req, res) => {
-        const data = await User.find({})
+  getAllUser: async (req, res) => {
+    const data = await User.find({});
 
+    res.json({
+      message: "Berhasil mendapatkan semua User",
+      data,
+    });
+  },
+  addUser: (req, res) => {
+    const data = req.body;
+
+    //check if file uploaded
+    if (req.file) {
+      console.log("File uploaded: ", req.file);
+      data.avatar = `/userID-assets/${req.file.filename}`; //rename jadi data.avatar
+    } else {
+      console.log("No file uploaded");
+    }
+
+    const newUser = new User(data);
+    newUser
+      .save()
+      .then((savedUser) => {
         res.json({
-            message: "Berhasil mendapatkan semua User",
-            data
-        })
-    },
-    addUser: (req, res) => {
-        const data = req.body
-
-        //check if file uploaded
-        if(req.file){
-            console.log("File uploaded: ", req.file)
-            data.avatar = `/userID-assets/${req.file.filename}` //rename jadi data.avatar
-        }else{
-            console.log("No file uploaded")
-        }
-
-        const newUser = new User(data)
-        newUser.save()
-        .then((savedUser) => {
-            res.json({
-            message: "User berhasil dibuat",
-            savedUser
-            })
-        })
-        .catch((e) => {
-            console.log("Error saving user data", e)
-            res.json({
-                message: "Gagal membuat user"
-            })
-        })
-        
-    },
-    editUser: async (req, res) => {
-        const { id } = req.params
-
-        // const editUser = await User.findByIdAndUpdate(id, req.body)
-        // editUser.save()
-
-        const editData =  {
-            ...req.body,
-            edited: new Date() //auto set edit date
-        }
-
-        if(req.file){
-            console.log("File uploaded: ", req.file)
-            editData.file = `/userID-assets/${req.file.filename}`
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(id, editData, { new: true })
+          message: "User berhasil dibuat",
+          savedUser,
+        });
+      })
+      .catch((e) => {
+        console.log("Error saving user data", e);
         res.json({
-            message: "Berhasil mengupdate user",
-            updatedUser
-        })
-    },
-    deleteUser: async (req, res) => {
-        const { id } = req.params
+          message: "Gagal membuat user",
+        });
+      });
+  },
+  editUser: async (req, res) => {
+    const { id } = req.params;
 
-        await User.findByIdAndDelete(id)
+    // const editUser = await User.findByIdAndUpdate(id, req.body)
+    // editUser.save()
 
-        res.json({
-            message: "berhasil hapus user"
-        })
-    },
-    getUserById: async (req, res) => {
-        const { id } = req.params
+    const editData = {
+      ...req.body,
+      edited: new Date(), //auto set edit date
+    };
 
-        const findUserbyId = await User.findById(id)
+    if (req.file) {
+      console.log("File uploaded: ", req.file);
+      editData.avatar = `/userID-assets/${req.file.filename}`; // rename jadi editData.avatar
+    }
 
-        res.json({
-            message: "berhasil mendapatkan user by id",
-            findUserbyId
-        })
-    },
-}
+    const updatedUser = await User.findByIdAndUpdate(id, editData, {
+      new: true,
+    });
+    res.json({
+      message: "Berhasil mengupdate user",
+      updatedUser,
+    });
+  },
+  deleteUser: async (req, res) => {
+    const { id } = req.params;
+
+    await User.findByIdAndDelete(id);
+
+    res.json({
+      message: "berhasil hapus user",
+    });
+  },
+  getUserById: async (req, res) => {
+    const { id } = req.params;
+
+    const findUserbyId = await User.findById(id);
+
+    res.json({
+      message: "berhasil mendapatkan user by id",
+      findUserbyId,
+    });
+  },
+};
