@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
@@ -9,24 +10,36 @@ const {
   checkAuth,
 } = require("../controllers/auth-controller");
 
-// Set up multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+// Konfigurasi Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+
+// Konfigurasi Multer-Storage-Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "identitasUser",
+    public_id: (req, file) => Date.now() + path.extname(file.originalname),
   },
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedExtensions = /jpg|jpeg|png|JPG|PNG|JPEG|JPG/;
-  const isValidExtension = allowedExtensions.test(file.mimetype);
+  const allowedExtensions = /jpg|jpeg|png/;
+  const extname = allowedExtensions.test(
+    path.extname(file.originalname).toLowerCase()
+  );
+  const mimetype = allowedExtensions.test(file.mimetype);
 
-  if (isValidExtension) {
+  if (mimetype && extname) {
     cb(null, true);
   } else {
-    cb(new Error("Ekstensi file tidak diperbolehkan!"), false);
+    cb(new Error("Only image and video files are allowed"));
   }
 };
 

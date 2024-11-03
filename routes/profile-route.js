@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const route = express.Router();
 const multer = require("multer");
@@ -7,28 +8,36 @@ const {
   editProfile,
 } = require("../controllers/profile-controller");
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "userID-assets");
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + path.extname(file.originalname); //buat generate unique file name
-    cb(null, uniqueName);
+const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+// Konfigurasi Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+
+// Konfigurasi Multer-Storage-Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "avatar",
+    public_id: (req, file) => Date.now() + path.extname(file.originalname),
   },
 });
 
-//filter file type
 const fileFilter = (req, file, cb) => {
-  const allowedFileTypes = /jpeg|jpg|png|pdf/;
-  const extname = allowedFileTypes.test(
+  const allowedExtensions = /jpg|jpeg|png/;
+  const extname = allowedExtensions.test(
     path.extname(file.originalname).toLowerCase()
   );
-  const mimetype = allowedFileTypes.test(file.mimetype);
+  const mimetype = allowedExtensions.test(file.mimetype);
 
   if (mimetype && extname) {
     cb(null, true);
   } else {
-    cb(new Error("Only image and pdf files are allowed"));
+    cb(new Error("Only image and video files are allowed"));
   }
 };
 
@@ -39,6 +48,6 @@ const upload = multer({
 });
 
 route.get("/", getProfile);
-route.put("/:id", editProfile);
+route.put("/:id", upload.single("avatar"), editProfile);
 
 module.exports = route;
