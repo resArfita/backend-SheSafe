@@ -5,6 +5,22 @@ const nodemailer = require("nodemailer");
 // const { ObjectId } = require("mongoose").Types;
 
 module.exports = {
+  getDataCases: async (req, res) => {
+    const data = await Cases.find([]);
+    res.status(200).json({
+      message: "berhasil mendapatkan data",
+      data,
+    });
+  },
+
+  getDataUser: async (req, res) => {
+    const data = await User.find([]);
+    res.status(200).json({
+      message: "berhasil mendapatkan data",
+      data,
+    });
+  },
+
   approvedCases: async (req, res) => {
     // const { id } = req.params;
     const { isApproved, notes, isAnonimous, _id } = req.body;

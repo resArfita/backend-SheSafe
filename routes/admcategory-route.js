@@ -3,6 +3,7 @@ const {
   addCategory,
   getAllCategory,
   editCategory,
+  deleteCategoryById,
 } = require("../controllers/category-controller");
 
 const route = express.Router();
