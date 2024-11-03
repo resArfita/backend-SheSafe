@@ -3,12 +3,11 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const {
-  regist,
-  login,
-  // getUser,
-  logout,
-  checkAuth,
-} = require("../controllers/auth-controller");
+  addModule,
+  getAllModule,
+  getEditModule,
+  deleteModule,
+} = require("../controllers/admedu-controller");
 
 const { v2: cloudinary } = require("cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -24,7 +23,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "identitasUser",
+    folder: "edukasi",
     public_id: (req, file) => Date.now() + path.extname(file.originalname),
   },
 });
@@ -46,17 +45,16 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 2 * 1024 * 1024,
+    fileSize: 5 * 1024 * 1024,
   },
   fileFilter: fileFilter,
 });
 
 const route = express.Router();
-route.post("/register", upload.single("fileIdentity"), regist);
-route.post("/login", login);
-route.post("/logout", logout);
 
-// route.get("/users", getUser);
-route.get("/check", checkAuth);
+route.post("/", upload.single("file"), addModule);
+route.get("/", getAllModule);
+route.put("/", getEditModule);
+route.delete("/", deleteModule);
 
 module.exports = route;

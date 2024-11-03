@@ -1,12 +1,14 @@
 const express = require("express");
-// const { regist, login, getUser } = require("../controllers/auth-controller");
-
+const {
+  getAllModule,
+  getDetailModule,
+} = require("../controllers/edu-controller");
 const route = express.Router();
 
-route.post("/add");
-route.get("/");
-route.get("/:id");
-route.put("/:id");
-route.delete("/:id");
+// route.post("/add");
+route.get("/", getAllModule); //get module
+route.get("/:id", getDetailModule); //get by id untuk melihat detail
+// route.put("/:id");
+// route.delete("/:id");
 
 module.exports = route;

@@ -1,14 +1,12 @@
 require("dotenv").config();
 const express = require("express");
+const route = express.Router();
 const multer = require("multer");
 const path = require("path");
 const {
-  regist,
-  login,
-  // getUser,
-  logout,
-  checkAuth,
-} = require("../controllers/auth-controller");
+  getProfile,
+  editProfile,
+} = require("../controllers/profile-controller");
 
 const { v2: cloudinary } = require("cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -24,7 +22,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "identitasUser",
+    folder: "avatar",
     public_id: (req, file) => Date.now() + path.extname(file.originalname),
   },
 });
@@ -45,18 +43,11 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: storage,
-  limits: {
-    fileSize: 2 * 1024 * 1024,
-  },
   fileFilter: fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, //limit 10MB
 });
 
-const route = express.Router();
-route.post("/register", upload.single("fileIdentity"), regist);
-route.post("/login", login);
-route.post("/logout", logout);
-
-// route.get("/users", getUser);
-route.get("/check", checkAuth);
+route.get("/", getProfile);
+route.put("/:id", upload.single("avatar"), editProfile);
 
 module.exports = route;
