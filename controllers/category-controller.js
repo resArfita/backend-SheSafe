@@ -1,6 +1,15 @@
 const Category = require("../models/Category");
 
 module.exports = {
+  getAllCategoryClient: async (req, res) => {
+    const data = await Category.find([]);
+
+    res.json({
+      message: "berhasil mendapatkan data",
+      data,
+    });
+  },
+
   getAllCategory: async (req, res) => {
     const data = await Category.find([]);
 
@@ -35,7 +44,7 @@ module.exports = {
   },
 
   editCategory: async (req, res) => {
-    const { _id, name, createdBy } = req.body;
+    const { id, name, createdBy } = req.body;
     if (!name || !createdBy) {
       return res.status(400).json({
         message: "Nama dan createdBy tidak boleh kosong",
@@ -43,7 +52,7 @@ module.exports = {
     }
     try {
       const updatedCategory = await Category.findByIdAndUpdate({
-        _id,
+        _id: id,
         name,
         createdBy,
       });
@@ -63,9 +72,9 @@ module.exports = {
   },
 
   deleteCategoryById: async (req, res) => {
-    const { _id } = req.body;
+    const { id } = req.body;
     try {
-      const deletedCategory = await Category.findByIdAndDelete(_id);
+      const deletedCategory = await Category.findByIdAndDelete({ _id: id });
       if (!deletedCategory) {
         return res.status(404).json({ message: "Data tidak ditemukan" });
       }
