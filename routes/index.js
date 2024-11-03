@@ -11,6 +11,8 @@ const catcRoute = require("./category-route");
 const casesRoute = require("./cases-route");
 const adminRoute = require("./admin-route");
 const approvedRoute = require("./approved-route");
+const educRoute = require("./edu-route");
+const eduRoute = require("./admedu-route");
 const { validateToken } = require("../middleware/auth");
 const { adminMiddleware } = require("../middleware/admin");
 
@@ -30,5 +32,7 @@ route.use("/admcategory", adminMiddleware, catRoute);
 route.use("/category", validateToken, catcRoute);
 route.use("/admin", adminRoute);
 route.use("/approved", adminMiddleware, approvedRoute);
+route.use("/education", validateToken, educRoute);
+route.use("/admeducation", adminMiddleware, eduRoute);
 
 module.exports = route;
