@@ -12,6 +12,6 @@ route.post("/register", regist);
 route.post("/login", login);
 route.post("/logout", logout);
 
-route.get("/users", getUser);
+route.get("/admin/users", getUser);
 
 module.exports = route;
