@@ -1,6 +1,6 @@
 const express = require("express")
 const route = express.Router()
-const { getAllJournal, getJournalByIdUser, addJournal, editJournal, deleteJournal, getDetailJournal } = require("../controllers/journal-controller")
+const { getAllJournal, getJournalByIdUser, addJournal, editJournal, deleteJournal, getDetailJournal, getJournalsPaginationByCategory, getJournalByCategoryAndSort } = require("../controllers/journal-controller")
 const multer = require("multer")
 const path = require("path")
 
@@ -39,5 +39,6 @@ route.get("/:id", getDetailJournal) //get Detail journal by id
 route.post("/", upload.single("file"), addJournal) //add Journal
 route.put("/:id", upload.single("file"), editJournal) //edit journal
 route.delete("/:id", deleteJournal) //delete by id
-
+route.get("/category", getJournalsPaginationByCategory); // journals by category name, pagination
+route.get("/category/sort", getJournalByCategoryAndSort); // journals by category name, sorting, pagination
 module.exports = route

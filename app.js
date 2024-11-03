@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 const allRoute = require("./routes");
 const db = require("./db");
 const cookieParser = require("cookie-parser");

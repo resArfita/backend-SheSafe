@@ -2,7 +2,35 @@ const Cases = require("../models/Cases");
 const Journal = require("../models/Journal");
 
 module.exports = {
-  getCases: async (req, res) => {
+   // Fungsi untuk mendapatkan semua kasus dengan pagination dan status
+   getCases: async (req, res) => {
+    const { status = "", page = 1, perPage = 10 } = req.query; //rename limit jadi perPage
+
+    try {
+      const cases = await Cases.find(status ? { isApproved: status } : {})
+        .sort({ created: "desc" })
+        .skip((page - 1) * perPage)
+        .limit(Number(perPage));
+
+      const totalCases = await Cases.countDocuments(status ? { isApproved: status } : {});
+
+      res.status(200).json({
+        message: "Berhasil mendapatkan semua kasus",
+        totalCases,
+        totalPages: Math.ceil(totalCases / perPage),
+        currentPage: page,
+        cases,
+      });
+    } catch (error) {
+      console.error("Error getting cases with status filter", error);
+      res.status(500).json({
+        message: "Gagal mendapatkan kasus",
+        error: error.message,
+      });
+    }
+  },
+
+  getCases_bcp: async (req, res) => {
     const { userId } = req.user;
     const Status = req.query.status || "";
 
@@ -69,6 +97,7 @@ module.exports = {
       });
     }
   },
+ 
 
   addCases: async (req, res) => {
     const { userId } = req.user;

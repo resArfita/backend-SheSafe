@@ -22,7 +22,7 @@ module.exports = {
     });
   },
   //vita: edit iduser diambil dari req.user, tambah sort created desc
-  getJournalByIdUser: (req, res) => {
+  getJournalByIdUser_bcp: (req, res) => {
     const { userId } = req.user;
 
     Journal.find({ createdBy: userId })
@@ -102,5 +102,95 @@ module.exports = {
     res.json({
       message: "Berhasil hapus Journal",
     });
+  },
+
+  //jurnal yang hanya bisa diliat oleh user itu sendiri, 
+  getJournalByIdUser: async (req, res) => { //rename nama function
+    const { userId } = req.user; //tambah req.user
+    const { page = 1, perPage = 10, sort = 'desc' } = req.query;  //rename limit to perPage
+    const sortOrder = sort === 'asc' ? 1 : -1; 
+  
+    try {
+      const data = await Journal.find({createdBy: userId}) // tambah createdBy:userId
+        .populate("createdBy")
+        .sort({ created: sortOrder }) 
+        .skip((page - 1) * perPage) 
+        .limit(perPage);
+  
+      const total = await Journal.countDocuments(); 
+      res.json({
+        message: "Berhasil mendapatkan semua Journal",
+        data,
+        totalPages: Math.ceil(total / perPage),
+        currentPage: page,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Gagal mendapatkan jurnal", error: error.message });
+    }
+  },
+
+
+  getJournalsPaginationByCategory: async (req, res) => {
+    const { categoryName } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    
+    try {
+      const category = await Category.findOne({ name: categoryName });
+    
+      if (!category) {
+        return res.status(404).json({ message: "Kategori tidak ditemukan" });
+      }
+    
+      const journals = await Journal.find({ category: category._id })
+        .populate("createdBy")
+        .sort({ created: "desc" })
+        .skip((page - 1) * limit)
+        .limit(limit);
+    
+      const totalJournals = await Journal.countDocuments({ category: category._id });
+      const totalPages = Math.ceil(totalJournals / limit);
+    
+      res.json({
+        message: "Berhasil mendapatkan Journal berdasarkan kategori",
+        data: journals,
+        totalPages: totalPages,
+        currentPage: page,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Terjadi kesalahan", error: error.message });
+    }
+  },
+  getJournalByCategoryAndSort: async (req, res) => {
+    const { categoryName } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const sort = req.query.sort === 'desc' ? -1 : 1; 
+
+    try {
+      const category = await Category.findOne({ name: categoryName });
+
+      if (!category) {
+        return res.status(404).json({ message: "Kategori tidak ditemukan" });
+      }
+
+      const journals = await Journal.find({ category: category._id })
+        .populate("createdBy")
+        .sort({ created: sort })
+        .skip((page - 1) * limit)
+        .limit(limit);
+
+      const totalJournals = await Journal.countDocuments({ category: category._id });
+      const totalPages = Math.ceil(totalJournals / limit);
+
+      res.json({
+        message: "Berhasil mendapatkan Journal berdasarkan kategori dan sortir",
+        data: journals,
+        totalPages: totalPages,
+        currentPage: page,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Terjadi kesalahan", error: error.message });
+    }
   },
 };
