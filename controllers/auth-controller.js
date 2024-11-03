@@ -118,7 +118,7 @@ module.exports = {
 
       res.status(201).json({
         message: "Berhasil login",
-        token,
+        // token,
       });
     } catch (error) {
       res.status(400).json({ message: "Gagal Login" });
