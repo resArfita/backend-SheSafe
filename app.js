@@ -11,7 +11,8 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {
-      const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+      const allowedOrigins = process.env.ALLOWED_ORIGINS;
+      // const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 
       console.log("Incoming Origin:", origin);
 
