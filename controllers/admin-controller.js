@@ -88,8 +88,8 @@ module.exports = {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
-          sameSite: true,
+          secure: process.env.NODE_ENV === "production",
+          // sameSite: true,
         })
         .status(201)
         .json({ message: "User Berhasil Login" });

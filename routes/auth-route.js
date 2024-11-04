@@ -7,7 +7,6 @@ const {
   login,
   // getUser,
   logout,
-  checkAuth,
 } = require("../controllers/auth-controller");
 
 const { v2: cloudinary } = require("cloudinary");
@@ -55,8 +54,11 @@ const route = express.Router();
 route.post("/register", upload.single("fileIdentity"), regist);
 route.post("/login", login);
 route.post("/logout", logout);
-
-// route.get("/users", getUser);
-route.get("/check", checkAuth);
+route.get("/check", (req, res) => {
+  if (req.user) {
+    return res.status(200).json({ isAuthenticated: true, user: req.user });
+  }
+  return res.status(401).json({ isAuthenticated: false });
+});
 
 module.exports = route;

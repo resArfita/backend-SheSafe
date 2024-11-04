@@ -111,8 +111,9 @@ module.exports = {
 
       res.cookie("tokenUser", token, {
         httpOnly: true,
-        secure: false,
-        sameSite: true,
+        secure: process.env.NODE_ENV === "production",
+        // secure: false,
+        // sameSite: true,
         // { expiresIn: "1h" }
       });
 
