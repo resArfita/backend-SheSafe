@@ -89,7 +89,7 @@ module.exports = {
         .cookie("token", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          // sameSite: true,
+          sameSite: "None",
         })
         .status(201)
         .json({ message: "User Berhasil Login" });

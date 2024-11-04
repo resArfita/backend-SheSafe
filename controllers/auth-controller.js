@@ -113,7 +113,7 @@ module.exports = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         // secure: false,
-        // sameSite: true,
+        sameSite: "None",
         // { expiresIn: "1h" }
       });
 
