@@ -90,7 +90,7 @@ module.exports = {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-          Partitioned: true,
+          // Partitioned: true,
         })
         .status(201)
         .json({ message: "User Berhasil Login" });
