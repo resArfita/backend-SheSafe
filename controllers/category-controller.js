@@ -2,7 +2,7 @@ const Category = require("../models/Category");
 
 module.exports = {
   getAllCategoryClient: async (req, res) => {
-    const data = await Category.find([]);
+    const data = await Category.find({});
 
     res.json({
       message: "berhasil mendapatkan data",
