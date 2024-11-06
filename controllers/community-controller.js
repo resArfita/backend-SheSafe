@@ -45,10 +45,12 @@ module.exports = {
         return res.status(200).json({
           message: "Berhasil Menampilkan Data",
           data,
-          total_data: totalData,
-          per_page: perPage,
-          current_page: currentPage,
-          total_page: totalPages,
+          pagination: {
+            total_data: totalData,
+            per_page: perPage,
+            current_page: currentPage,
+            total_pages: totalPages,
+          },
         });
       } else {
         return res.status(404).json({
