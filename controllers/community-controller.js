@@ -34,25 +34,27 @@ module.exports = {
       const [totalData, data] = await Promise.all([
         Cases.find(filter).countDocuments(),
         Cases.find(filter)
-          .sort({ approved: "desc" }) // Urutkan berdasarkan approved
-          .populate("category", "name") // Populasi data kategori
-          .populate("createdBy", "avatar") // Populasi data pengguna yang membuat
-          .skip((currentPage - 1) * perPage) // Skip untuk pagination
-          .limit(perPage) // Limit untuk pagination
+          .sort({ approved: "desc" })
+          .populate("category", "name")
+          .populate("createdBy", "avatar")
+          .skip((currentPage - 1) * perPage)
+          .limit(perPage)
           .lean(),
       ]);
 
-      const totalPages = Math.ceil(totalData / perPage); // Hitung total halaman
+      const totalPages = Math.ceil(totalData / perPage);
 
       // Jika ada data, kirimkan response sukses
       if (data && data.length > 0) {
         return res.status(200).json({
           message: "Berhasil Menampilkan Data",
           data,
-          total_data: totalData,
-          per_page: perPage,
-          current_page: currentPage,
-          total_page: totalPages,
+          pagination: {
+            total_data: totalData,
+            per_page: perPage,
+            current_page: currentPage,
+            total_page: totalPages,
+          },
         });
       } else {
         return res.status(404).json({
