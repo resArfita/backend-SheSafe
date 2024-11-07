@@ -4,20 +4,28 @@ module.exports = {
   addModule: async (req, res) => {
     const { adminId } = req.admin;
     const data = req.body;
+
     try {
-      const newModule = new Education(...data, {
+      const fileUrl = req.file
+        ? cloudinary.url(req.file.public_id, { secure: true })
+        : null;
+
+      const newModule = new Education({
+        ...data,
         createdBy: adminId,
-        file: req.file.path,
+        file: fileUrl,
       });
 
       await newModule.save();
       res.status(201).json({
-        message: "berhasil menambahkan module",
-        data,
+        message: "Berhasil menambahkan module",
+        data: newModule,
       });
     } catch (error) {
-      res.json({
-        message: "gagal",
+      console.error(error);
+      res.status(500).json({
+        message: "Gagal menambahkan module",
+        error: error.message || error,
       });
     }
   },
@@ -32,14 +40,39 @@ module.exports = {
   },
 
   getEditModule: async (req, res) => {
-    const { id } = req.body;
+    const { id } = req.params;
+    const data = req.body;
 
-    const findModule = await Education.findById({ _id: id });
+    try {
+      const findModule = await Education.findById(id);
 
-    res.json({
-      message: "Berhasil mendapatkan detail module by",
-      findModule,
-    });
+      if (!findModule) {
+        return res.status(404).json({
+          message: "Modul tidak ditemukan",
+        });
+      }
+
+      if (data.file && req.file) {
+        // Jika ada file baru yang diupload, update file di Cloudinary
+        const fileUrl = cloudinary.url(req.file.public_id, { secure: true });
+        data.file = fileUrl;
+      }
+
+      const updatedModule = await Education.findByIdAndUpdate(id, data, {
+        new: true,
+      });
+
+      res.json({
+        message: "Berhasil mengedit modul",
+        updatedModule,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Gagal mengedit modul",
+        error: error.message || error,
+      });
+    }
   },
 
   deleteModule: async (req, res) => {

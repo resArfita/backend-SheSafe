@@ -54,7 +54,7 @@ const route = express.Router();
 
 route.post("/", upload.single("file"), addModule);
 route.get("/", getAllModule);
-route.put("/", getEditModule);
+route.put("/", upload.single("file"), getEditModule);
 route.delete("/", deleteModule);
 
 module.exports = route;
