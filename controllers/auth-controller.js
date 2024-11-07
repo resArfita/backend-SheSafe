@@ -12,57 +12,101 @@ module.exports = {
   },
 
   regist: async (req, res) => {
-    // const data = req.body
-    const { fullName, email, gender, password, birthDate } = req.body; //tambahbirthDate
+    // Mendapatkan data dari body request
+    const { fullName, email, gender, password, birthDate, passwordConfirm } =
+      req.body;
 
     // Validasi input
     if (!fullName) {
-      return res.json({ message: "fullname tidak boleh kosong" });
+      return res
+        .status(400)
+        .json({ message: "Nama lengkap tidak boleh kosong" });
     }
 
     if (!email) {
-      return res.json({ message: "email tidak boleh kosong" });
+      return res.status(400).json({ message: "Email tidak boleh kosong" });
     }
 
     if (!gender) {
-      return res.json({ message: "gender tidak boleh kosong" });
+      return res
+        .status(400)
+        .json({ message: "Jenis kelamin tidak boleh kosong" });
     }
 
     if (!password) {
-      return res.json({ message: "password tidak boleh kosong" });
+      return res.status(400).json({ message: "Password tidak boleh kosong" });
+    }
+
+    if (!passwordConfirm) {
+      return res
+        .status(400)
+        .json({ message: "Konfirmasi password tidak boleh kosong" });
+    }
+
+    if (password !== passwordConfirm) {
+      return res
+        .status(400)
+        .json({ message: "Password dan konfirmasi password tidak cocok" });
     }
 
     if (!birthDate) {
-      return res.json({ message: "tanggal lahir tidak boleh kosong" });
+      return res
+        .status(400)
+        .json({ message: "Tanggal lahir tidak boleh kosong" });
     }
 
+    // Validasi email (Format)
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Email tidak valid" });
+    }
+
+    // Validasi file identitas
     if (!req.file) {
-      return res.json({ message: "Bukti Identitas tidak boleh kosong" });
+      return res
+        .status(400)
+        .json({ message: "Bukti identitas tidak boleh kosong" });
     }
 
-    //password hashing
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    // console.log(data)
+    // Validasi tipe file
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!allowedMimeTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({
+        message: "Hanya file gambar (jpeg, png, jpg) yang diperbolehkan",
+      });
+    }
+
+    // Validasi ukuran file (misalnya maksimal 2MB)
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    if (req.file.size > MAX_SIZE) {
+      return res
+        .status(400)
+        .json({ message: "File terlalu besar, maksimal 2MB" });
+    }
 
     try {
       // Cek apakah email sudah digunakan
       const checkEmail = await User.findOne({ email });
-
       if (checkEmail) {
-        return res.json({
+        return res.status(400).json({
           message: "Email sudah digunakan, silahkan gunakan Email yang lain",
         });
       }
 
+      // Hash password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Simpan data pengguna baru
       const newUser = new User({
         fullName,
         email,
         gender,
         birthDate,
-        fileIdentity: req.file.path,
-        password: hashedPassword, // Use hashed password
+        fileIdentity: req.file.path, // Menyimpan path file yang diupload
+        password: hashedPassword, // Password yang sudah di-hash
       });
+
       await newUser.save();
 
       return res.status(201).json({
@@ -76,7 +120,7 @@ module.exports = {
       });
     } catch (error) {
       return res
-        .status(400)
+        .status(500)
         .json({ message: "Gagal Registrasi", error: error.message });
     }
   },
@@ -94,14 +138,13 @@ module.exports = {
     //CheckAccount
     if (user.isValidated !== "validated") {
       return res
-        .status(404)
+        .status(403)
         .json({ message: "Akun anda belum tervalidasi identitasnya" });
     }
 
     //if user exist -> compare pass w/ bcrypt
     const checkPassword = await bcrypt.compare(data.password, user.password);
-    if (!checkPassword) return res.json({ message: "Gagal login" });
-
+    if (!checkPassword) return res.status(401).json({ message: "Gagal login" });
     //token
     try {
       const token = jwt.sign(
