@@ -2,11 +2,11 @@ const Education = require("../models/Education");
 
 module.exports = {
   addModule: async (req, res) => {
-    const { adminID } = req.adminID;
+    const { adminId } = req.admin;
     const data = req.body;
     try {
       const newModule = new Education(...data, {
-        createdBy: adminID,
+        createdBy: adminId,
         file: req.file.path,
       });
 
