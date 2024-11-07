@@ -7,7 +7,6 @@ const {
   getCasesById,
   addCasesDraft,
   getJournalforCasesByID,
-  getJournalById,
 } = require("../controllers/cases-controller");
 // const { regist, login, getUser } = require("../controllers/auth-controller");
 
@@ -20,6 +19,5 @@ route.get("/:id", getCasesById);
 route.put("/", editCases);
 route.delete("/", deletedCases);
 route.get("/byjournal/:id", getJournalforCasesByID);
-route.get("/byjournal", getJournalById);
 
 module.exports = route;

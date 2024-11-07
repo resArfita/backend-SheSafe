@@ -2,8 +2,8 @@ const Cases = require("../models/Cases");
 const Journal = require("../models/Journal");
 
 module.exports = {
-   // Fungsi untuk mendapatkan semua kasus dengan pagination dan status
-   getCases: async (req, res) => {
+  // Fungsi untuk mendapatkan semua kasus dengan pagination dan status
+  getCases: async (req, res) => {
     const { status = "", page = 1, perPage = 10 } = req.query; //rename limit jadi perPage
 
     try {
@@ -12,7 +12,9 @@ module.exports = {
         .skip((page - 1) * perPage)
         .limit(Number(perPage));
 
-      const totalCases = await Cases.countDocuments(status ? { isApproved: status } : {});
+      const totalCases = await Cases.countDocuments(
+        status ? { isApproved: status } : {}
+      );
 
       res.status(200).json({
         message: "Berhasil mendapatkan semua kasus",
@@ -64,22 +66,6 @@ module.exports = {
     }
   },
 
-  //ini dari form pengajuan ketik pilih journal
-  getJournalById: async (req, res) => {
-    const Journal = req.query.JournalID || "";
-    const data = await Journal.find({ _id: Journal });
-    if (data) {
-      res.status(200).json({
-        message: "data jurnal berhasil ditampilkan",
-        data,
-      });
-    } else {
-      res.status(400).json({
-        message: "data jurnal tidak ditemukan",
-      });
-    }
-  },
-
   getCasesById: async (req, res) => {
     // const { userId } = req.user;
 
@@ -97,7 +83,6 @@ module.exports = {
       });
     }
   },
- 
 
   addCases: async (req, res) => {
     const { userId } = req.user;
