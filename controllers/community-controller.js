@@ -13,16 +13,18 @@ module.exports = {
       const currentPage = parseInt(req.query.page) || 1;
       const perPage = parseInt(req.query.perPage) || 6;
 
+      // Filter berdasarkan status isApproved
       let filter = { isApproved: "Approved" };
       let categoryId;
 
+      // Jika ada kategori, filter berdasarkan kategori
       if (CategoryName) {
         const category = await Category.findOne({ name: CategoryName });
         if (category) {
           categoryId = category._id;
           filter.category = categoryId;
         } else {
-          return res.status(400).json({
+          return res.status(404).json({
             message: "Kategori tidak ditemukan",
           });
         }
@@ -39,8 +41,10 @@ module.exports = {
           .limit(perPage)
           .lean(),
       ]);
+
       const totalPages = Math.ceil(totalData / perPage);
 
+      // Jika ada data, kirimkan response sukses
       if (data && data.length > 0) {
         return res.status(200).json({
           message: "Berhasil Menampilkan Data",
