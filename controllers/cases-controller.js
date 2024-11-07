@@ -105,6 +105,7 @@ module.exports = {
         message: "Kategori tidak boleh kosong",
       });
     }
+    const counter = Math.round(Math.random() * 1e9);
 
     try {
       const newCases = new Cases({
@@ -116,6 +117,7 @@ module.exports = {
         created: new Date(),
         isApproved: "Submitted",
         journalID,
+        isAnonimous: "Anonim" + counter,
       });
       await newCases.save();
       res.status(201).json({
@@ -155,6 +157,7 @@ module.exports = {
         message: "Kategori tidak boleh kosong",
       });
     }
+    const counter = Math.round(Math.random() * 1e9);
 
     try {
       const newCases = new Cases({
@@ -166,6 +169,7 @@ module.exports = {
         created: new Date(),
         isApproved: "Draft",
         journalID,
+        isAnonimous: "Anonim" + counter,
       });
       await newCases.save();
       res.status(201).json({
