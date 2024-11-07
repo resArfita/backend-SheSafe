@@ -4,7 +4,6 @@ const Category = require("../models/Category");
 
 const Support = require("../models/Support");
 
-// Controller untuk menambahkan komentar
 module.exports = {
   getCommunity: async (req, res) => {
     try {
@@ -14,42 +13,48 @@ module.exports = {
       const currentPage = parseInt(req.query.page) || 1;
       const perPage = parseInt(req.query.perPage) || 6;
 
+      // Filter berdasarkan status isApproved
       let filter = { isApproved: "Approved" };
-
       let categoryId;
+
+      // Jika ada kategori, filter berdasarkan kategori
       if (CategoryName) {
-        const category = await Category.find({ name: CategoryName });
-        if (category.length > 0) {
-          categoryId = category[0]._id;
+        const category = await Category.findOne({ name: CategoryName });
+        if (category) {
+          categoryId = category._id;
           filter.category = categoryId;
         } else {
-          res.status(400).json({
+          return res.status(404).json({
             message: "Kategori tidak ditemukan",
           });
         }
       }
 
-      let totalData;
+      // Parallel query untuk count dan data
+      const [totalData, data] = await Promise.all([
+        Cases.find(filter).countDocuments(),
+        Cases.find(filter)
+          .sort({ approved: "desc" })
+          .populate("category", "name")
+          .populate("createdBy", "avatar")
+          .skip((currentPage - 1) * perPage)
+          .limit(perPage)
+          .lean(),
+      ]);
 
-      const countData = await Cases.find(filter).countDocuments();
+      const totalPages = Math.ceil(totalData / perPage);
 
-      totalData = countData;
-
-      const data = await Cases.find(filter)
-        .sort({
-          approved: "desc",
-        })
-        .populate("category", "name")
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-
+      // Jika ada data, kirimkan response sukses
       if (data && data.length > 0) {
         return res.status(200).json({
           message: "Berhasil Menampilkan Data",
           data,
-          total_data: totalData,
-          per_page: perPage,
-          current_page: currentPage,
+          pagination: {
+            total_data: totalData,
+            per_page: perPage,
+            current_page: currentPage,
+            total_pages: totalPages,
+          },
         });
       } else {
         return res.status(404).json({
@@ -67,7 +72,10 @@ module.exports = {
   getCommunityById: async (req, res) => {
     try {
       const { id } = req.params;
-      const data = await Cases.find({ _id: id, isApproved: "Approved" });
+      const data = await Cases.find({ _id: id, isApproved: "Approved" })
+        .populate("category", "name")
+        .populate("createdBy", "avatar")
+        .lean();
 
       if (data && data.length > 0) {
         return res.status(200).json({
@@ -107,10 +115,20 @@ module.exports = {
 
       await newCommentar.save();
 
-      return res.status(201).json({
-        message: "Commentar created successfully",
-        data: newCommentar,
-      });
+      const addComment = await Cases.findOneAndUpdate(
+        { _id: id },
+        {
+          $inc: { commentCounter: 1 },
+        },
+        { new: true }
+      );
+
+      if (addComment) {
+        return res.status(201).json({
+          message: "Berhasil Memberikan Dukungan",
+          commentCounter: addComment.commentCounter,
+        });
+      }
     } catch (error) {
       console.error("Error creating commentar:", error);
       return res.status(500).json({ message: "Internal server error" });
@@ -120,26 +138,110 @@ module.exports = {
   getCommentar: async (req, res) => {
     try {
       const { id } = req.params;
-      const commentar = await Commentar.find({ casesID: id })
-        .populate("createdBy")
-        .sort({
-          created: "desc",
-        });
+      const currentPage = parseInt(req.query.page) || 1;
+      const perPage = parseInt(req.query.perPage) || 10;
 
+      // Hitung total komentar yang ada
+      const totalData = await Commentar.countDocuments({ casesID: id });
+
+      const commentar = await Commentar.find({ casesID: id })
+        .populate("createdBy", "fullName avatar")
+        .sort({ created: "desc" })
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage)
+        .lean(); // Menghindari Mongoose overhead
+
+      // Menghitung total halaman berdasarkan total data dan perPage
+      const totalPages = Math.ceil(totalData / perPage);
+
+      // Jika ada komentar, kembalikan response dengan data pagination
       if (commentar && commentar.length > 0) {
-        res.status(200).json({
-          message: "berhasil menampilan commentar",
+        return res.status(200).json({
+          message: "Berhasil menampilkan komentar",
           commentar,
+          pagination: {
+            total_data: totalData,
+            per_page: perPage,
+            current_page: currentPage,
+            total_pages: totalPages,
+          },
         });
       } else {
-        res.status(400).json({
-          message: "data tidak ditemukan",
+        return res.status(400).json({
+          message: "Data tidak ditemukan",
         });
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching comments:", error);
       return res.status(500).json({
-        message: "Gagal menampilkan data",
+        message: "Gagal menampilkan komentar",
+      });
+    }
+  },
+
+  deleteCommentar: async (req, res) => {
+    try {
+      const { _id } = req.body;
+      const { userId } = req.user; // id komentar yang akan dihapus
+      const { casesID } = req.params; // casesID dari parameter URL
+
+      // Menghapus komentar berdasarkan id
+      const deleteComment = await Commentar.deleteOne({
+        _id,
+        createdBy: userId,
+        casesID: casesID,
+      });
+
+      if (deleteComment.deletedCount === 0) {
+        return res.status(404).json({
+          message: "Komentar tidak ditemukan atau sudah dihapus.",
+        });
+      }
+
+      // Mengupdate counter komentar di Cases
+      const updateComment = await Cases.findOneAndUpdate(
+        { _id: casesID },
+        {
+          $inc: { commentCounter: -1 }, // Mengurangi jumlah komentar
+        },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        message: "Berhasil menghapus komentar",
+        commentCounter: updateComment.commentCounter,
+      });
+    } catch (error) {
+      console.error("Error creating support:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  getSupport: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId } = req.user;
+
+      const data = await Support.find({
+        casesID: id,
+        createdBy: userId,
+      }).lean();
+      if (!data || data.length === 0) {
+        return res.status(404).json({
+          message: "Data tidak ditemukan",
+          data: [],
+        });
+      }
+
+      res.json({
+        message: "Berhasil mendapatkan data",
+        data,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Terjadi kesalahan saat mengambil data",
+        error: error.message,
       });
     }
   },
@@ -151,13 +253,6 @@ module.exports = {
       const { userId } = req.user;
       const { count } = req.body;
 
-      const checkSupport = await Support.findOne({ createdBy: userId });
-      if (checkSupport) {
-        return res.json({
-          message: "Anda sudah memberikan dukungan",
-        });
-      }
-
       const newSupport = new Support({
         casesID: id,
         createdBy: userId,
@@ -166,12 +261,10 @@ module.exports = {
       });
       await newSupport.save();
 
-      const dataSupport = await Support.find().countDocuments();
-
       const addSupport = await Cases.findOneAndUpdate(
         { _id: id },
         {
-          supportCounter: dataSupport,
+          $inc: { supportCounter: 1 },
         },
         { new: true }
       );
@@ -255,23 +348,19 @@ module.exports = {
       const { userId } = req.user;
       const { id } = req.body;
 
-      // Menghapus dukungan berdasarkan casesID dan createdBy
       const deleteSupport = await Support.deleteOne({
         casesID: id,
         createdBy: userId,
       });
 
-      // Memastikan dukungan telah dihapus
       if (deleteSupport.deletedCount === 0) {
         return res.status(404).json({
           message: "Dukungan tidak ditemukan atau sudah dihapus.",
         });
       }
 
-      // Menghitung total dukungan yang tersisa
       const dataSupport = await Support.countDocuments();
 
-      // Memperbarui supportCounter pada model Cases
       const updateSupport = await Cases.findOneAndUpdate(
         { _id: id },
         {
@@ -280,7 +369,6 @@ module.exports = {
         { new: true }
       );
 
-      // Mengirimkan respons setelah semua operasi selesai
       return res.status(200).json({
         message: "Berhasil menghapus Dukungan",
         supportCounter: updateSupport.supportCounter,
@@ -296,32 +384,25 @@ module.exports = {
       const { userId } = req.user;
       const { id } = req.params;
 
-      // Menghapus dukungan berdasarkan casesID dan createdBy
       const deleteSupport = await Support.deleteOne({
         casesID: id,
         createdBy: userId,
       });
 
-      // Memastikan dukungan telah dihapus
       if (deleteSupport.deletedCount === 0) {
         return res.status(404).json({
           message: "Dukungan tidak ditemukan atau sudah dihapus.",
         });
       }
 
-      // Menghitung total dukungan yang tersisa
-      const dataSupport = await Support.countDocuments();
-
-      // Memperbarui supportCounter pada model Cases
       const updateSupport = await Cases.findOneAndUpdate(
         { _id: id },
         {
-          supportCounter: dataSupport,
+          $inc: { supportCounter: -1 },
         },
         { new: true }
       );
 
-      // Mengirimkan respons setelah semua operasi selesai
       return res.status(200).json({
         message: "Berhasil menghapus Dukungan",
         supportCounter: updateSupport.supportCounter,

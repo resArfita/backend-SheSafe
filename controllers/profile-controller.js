@@ -34,7 +34,7 @@ module.exports = {
 
     if (req.file) {
       console.log("File uploaded: ", req.file);
-      editData.avatar = `/userID-assets/${req.file.filename}`;
+      editData.avatar = `/${req.file.filename}`;
     }
 
     const updatedUser = await User.findByIdAndUpdate({ _id: id }, editData, {
