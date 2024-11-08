@@ -89,6 +89,7 @@ module.exports = {
       // const fileUrl = uploadResponse.secure_url; // Ambil URL gambar yang telah di-upload
 
       // fileUrl = req.file.path;
+
       // Hash password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -154,7 +155,7 @@ module.exports = {
         secure: process.env.NODE_ENV === "production",
         // secure: false,
         sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-        Partitioned: true,
+        // Partitioned: true,
         // { expiresIn: "1h" }
       });
 
@@ -168,7 +169,10 @@ module.exports = {
   },
 
   logout: (req, res) => {
-    res.clearCookie("tokenUser");
-    res.status(201).json({ message: "berhasil Logout" });
+    res.clearCookie("tokenUser", {
+      httpOnly: true,
+       secure: process.env.NODE_ENV === "production",
+       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  });    res.status(201).json({ message: "berhasil Logout" });
   },
 };
