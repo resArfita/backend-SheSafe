@@ -82,12 +82,13 @@ module.exports = {
       }
 
       // Upload file ke Cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
-        use_filename: true,
-        unique_filename: false,
-      });
-      const fileUrl = uploadResponse.secure_url; // Ambil URL gambar yang telah di-upload
+      // const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
+      //   use_filename: true,
+      //   unique_filename: false,
+      // });
+      // const fileUrl = uploadResponse.secure_url; // Ambil URL gambar yang telah di-upload
 
+      const fileUrl = req.file.path;
       // Hash password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
