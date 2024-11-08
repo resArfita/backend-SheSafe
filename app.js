@@ -8,12 +8,36 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 app.use(cookieParser());
 
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       const allowedOrigins = process.env.ALLOWED_ORIGINS;
+//       // const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+
+//       console.log("Incoming Origin:", origin);
+
+//       if (!origin) {
+//         return callback(null, true); // Izinkan permintaan tanpa origin
+//       }
+
+//       if (allowedOrigins.indexOf(origin) === -1) {
+//         const msg = `This origin ${origin} is not allowed.`;
+//         console.log(msg);
+//         return callback(new Error(msg), false);
+//       }
+//       return callback(null, true);
+//     },
+
+//     methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+//     allowedHeaders:
+//       "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+//     credentials: true,
+//   })
+// );
 app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = process.env.ALLOWED_ORIGINS;
-      // const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
-
       console.log("Incoming Origin:", origin);
 
       if (!origin) {
@@ -29,16 +53,15 @@ app.use(
     },
 
     methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-    allowedHeaders:
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+    allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
     credentials: true,
   })
 );
 
-app.use((req, res, next) => {
-  res.setHeader("Vary", "Origin");
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader("Origin");
+//   next();
+// });
 
 app.options("*", cors());
 
