@@ -1,5 +1,4 @@
 const User = require("../models/User");
-const { v2: cloudinary } = require("cloudinary");
 
 module.exports = {
   getProfile: async (req, res) => {
@@ -30,45 +29,30 @@ module.exports = {
     const { id } = req.params;
     const editData = {
       ...req.body,
-      edited: new Date(), //auto set edit date
+      edited: new Date(),
     };
 
-    let fileUrl = "";
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        { _id: id },
+        { ...editData },
+        { new: true }
+      );
 
-    if (req.file) {
-      try {
-        const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
-          use_filename: true,
-          unique_filename: false,
-        });
-        // Ambil URL gambar yang telah di-upload
-        fileUrl = uploadResponse.secure_url;
-        editData.avatar = fileUrl; // Set avatar di editData
-      } catch (error) {
-        console.error("Cloudinary upload failed:", error);
-        return res.status(500).json({
-          message: "Failed to upload image to Cloudinary",
-          error: error.message,
-        });
-      }
+      return res.json({
+        message: "Berhasil mengupdate user",
+        data: {
+          fullName: updatedUser.fullName,
+          email: updatedUser.email,
+          gender: updatedUser.gender,
+          birthDate: updatedUser.birthDate,
+          avatar: updatedUser.avatar,
+        },
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Gagal mengupdate user", error: error.message });
     }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      { _id: id },
-      { ...editData },
-      {
-        new: true,
-      }
-    );
-    res.json({
-      message: "Berhasil mengupdate user",
-      data: {
-        fullName: updatedUser.fullName,
-        email: updatedUser.email,
-        gender: updatedUser.gender,
-        birthDate: updatedUser.birthDate,
-        avatar: updatedUser.avatar,
-      },
-    });
   },
 };

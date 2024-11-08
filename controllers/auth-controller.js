@@ -2,7 +2,6 @@ require("dotenv").config();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { v2: cloudinary } = require("cloudinary");
 
 module.exports = {
   checkAuth: (req, res) => {
@@ -14,7 +13,7 @@ module.exports = {
 
   regist: async (req, res) => {
     // Mendapatkan data dari body request
-    const { fullName, email, gender, password, birthDate } = req.body;
+    const { fullName, email, gender, password, birthDate, fileUrl } = req.body;
 
     // Validasi input
     if (!fullName) {
@@ -50,26 +49,10 @@ module.exports = {
     }
 
     // Validasi file identitas
-    // if (!req.file) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "Bukti identitas tidak boleh kosong" });
-    // }
-
-    // Validasi tipe file
-    const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"];
-    if (!allowedMimeTypes.includes(req.file.mimetype)) {
-      return res.status(400).json({
-        message: "Hanya file gambar (jpeg, png, jpg) yang diperbolehkan",
-      });
-    }
-
-    // Validasi ukuran file (misalnya maksimal 2MB)
-    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-    if (req.file.size > MAX_SIZE) {
+    if (!fileUrl) {
       return res
         .status(400)
-        .json({ message: "File terlalu besar, maksimal 2MB" });
+        .json({ message: "Bukti identitas tidak boleh kosong" });
     }
 
     try {
@@ -80,15 +63,6 @@ module.exports = {
           message: "Email sudah digunakan, silahkan gunakan Email yang lain",
         });
       }
-
-      // Upload file ke Cloudinary
-      // const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
-      //   use_filename: true,
-      //   unique_filename: false,
-      // });
-      // const fileUrl = uploadResponse.secure_url; // Ambil URL gambar yang telah di-upload
-
-      // fileUrl = req.file.path;
 
       // Hash password
       const saltRounds = 10;
@@ -101,7 +75,7 @@ module.exports = {
         gender,
         birthDate,
         isValidated: "validated", //sementara
-        fileIdentity: "null", //sementara
+        fileIdentity: fileUrl, // Menggunakan URL dari Cloudinary
         password: hashedPassword,
       });
 
@@ -171,8 +145,9 @@ module.exports = {
   logout: (req, res) => {
     res.clearCookie("tokenUser", {
       httpOnly: true,
-       secure: process.env.NODE_ENV === "production",
-       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  });    res.status(201).json({ message: "berhasil Logout" });
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    });
+    res.status(201).json({ message: "berhasil Logout" });
   },
 };
