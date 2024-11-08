@@ -129,7 +129,7 @@ module.exports = {
         secure: process.env.NODE_ENV === "production",
         // secure: false,
         sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-        Partitioned: true,
+        // Partitioned: true,
         // { expiresIn: "1h" }
       });
 
@@ -143,7 +143,11 @@ module.exports = {
   },
 
   logout: (req, res) => {
-    res.clearCookie("tokenUser");
+    res.clearCookie("tokenUser", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    });
     res.status(201).json({ message: "berhasil Logout" });
   },
 };
