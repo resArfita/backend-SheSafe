@@ -71,8 +71,10 @@ module.exports = {
 
     try {
       const { id } = req.params;
-      const data = await Cases.findById({ _id: id });
-
+      const data = await Cases.findById({ _id: id }).populate(
+        "category",
+        "name"
+      );
       res.status(200).json({
         message: "berhasilmelihat detail",
         data,

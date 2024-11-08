@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   gender: { type: String, required: true },
   birthDate: { type: Date, required: true },
-  fileIdentity: { type: String, required: true }, //identitasfile
+  fileIdentity: { type: String }, //identitasfile
   avatar: { type: String, default: "null" }, //fotoprofil
   isValidated: { type: String },
   validated: { type: Date, default: null }, // Default to null if not immediately validated

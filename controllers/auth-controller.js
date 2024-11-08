@@ -50,11 +50,11 @@ module.exports = {
     }
 
     // Validasi file identitas
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ message: "Bukti identitas tidak boleh kosong" });
-    }
+    // if (!req.file) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Bukti identitas tidak boleh kosong" });
+    // }
 
     // Validasi tipe file
     const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"];
@@ -88,7 +88,8 @@ module.exports = {
       // });
       // const fileUrl = uploadResponse.secure_url; // Ambil URL gambar yang telah di-upload
 
-      const fileUrl = req.file.path;
+      // fileUrl = req.file.path;
+
       // Hash password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -100,7 +101,7 @@ module.exports = {
         gender,
         birthDate,
         isValidated: "validated", //sementara
-        fileIdentity: fileUrl,
+        fileIdentity: "null", //sementara
         password: hashedPassword,
       });
 

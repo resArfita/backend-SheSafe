@@ -9,7 +9,7 @@ const casesSchema = new mongoose.Schema({
   createdBy: { type: Schema.Types.ObjectId, ref: "User" },
   approvedBy: { type: Schema.Types.ObjectId, ref: "Admin" },
   created: { type: Date },
-  approved: { type: Date },
+  approved: { type: Date, default: Date.now }, //kasihdefaultnow
   isApproved: { type: String },
   supportCounter: { type: Number },
   commentCounter: { type: Number },
