@@ -2,6 +2,7 @@ require("dotenv").config();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { v2: cloudinary } = require("cloudinary");
 
 module.exports = {
   checkAuth: (req, res) => {
@@ -13,8 +14,7 @@ module.exports = {
 
   regist: async (req, res) => {
     // Mendapatkan data dari body request
-    const { fullName, email, gender, password, birthDate, passwordConfirm } =
-      req.body;
+    const { fullName, email, gender, password, birthDate } = req.body;
 
     // Validasi input
     if (!fullName) {
@@ -35,18 +35,6 @@ module.exports = {
 
     if (!password) {
       return res.status(400).json({ message: "Password tidak boleh kosong" });
-    }
-
-    if (!passwordConfirm) {
-      return res
-        .status(400)
-        .json({ message: "Konfirmasi password tidak boleh kosong" });
-    }
-
-    if (password !== passwordConfirm) {
-      return res
-        .status(400)
-        .json({ message: "Password dan konfirmasi password tidak cocok" });
     }
 
     if (!birthDate) {
@@ -93,6 +81,13 @@ module.exports = {
         });
       }
 
+      // Upload file ke Cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
+        use_filename: true,
+        unique_filename: false,
+      });
+      const fileUrl = uploadResponse.secure_url; // Ambil URL gambar yang telah di-upload
+
       // Hash password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -103,8 +98,9 @@ module.exports = {
         email,
         gender,
         birthDate,
-        fileIdentity: req.file.path, // Menyimpan path file yang diupload
-        password: hashedPassword, // Password yang sudah di-hash
+        isValidated: "validated", //sementara
+        fileIdentity: fileUrl,
+        password: hashedPassword,
       });
 
       await newUser.save();

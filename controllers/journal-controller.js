@@ -35,7 +35,7 @@ module.exports = {
   getDetailJournal: async (req, res) => {
     const { id } = req.params;
 
-    const findJournal = await Journal.findById(id);
+    const findJournal = await Journal.findById(id).populate("category", "name");
 
     res.json({
       message: "Berhasil mendapatkan detail Journal by id",

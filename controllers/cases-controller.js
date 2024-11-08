@@ -115,7 +115,7 @@ module.exports = {
         message,
         createdBy: userId,
         created: new Date(),
-        isApproved: "Submitted",
+        isApproved: "Approved", //ganti jadi Approved dulu
         journalID,
         isAnonimous: "Anonim" + counter,
       });
