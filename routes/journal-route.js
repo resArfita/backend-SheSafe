@@ -55,6 +55,10 @@ route.get("/", getJournalByIdUser); //get Journal by id user
 route.get("/:id", getDetailJournal); //get Detail journal by id
 route.post("/", upload.single("file"), async (req, res, next) => {
   try {
+    if (!req.file) {
+      return res.status(400).send("No file uploaded.");
+    }
+
     const result = await uploadToCloudinary(req.file.buffer);
     req.body.fileUrl = result.secure_url;
     await addJournal(req, res);
@@ -64,9 +68,13 @@ route.post("/", upload.single("file"), async (req, res, next) => {
 }); //add Journal
 route.put("/:id", upload.single("file"), async (req, res, next) => {
   try {
+    if (!req.file) {
+      return res.status(400).send("No file uploaded.");
+    }
+
     const result = await uploadToCloudinary(req.file.buffer);
     req.body.fileUrl = result.secure_url;
-    await editJournal(req, res);
+    await addJournal(req, res);
   } catch (error) {
     next(error);
   }

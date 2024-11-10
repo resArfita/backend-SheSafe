@@ -56,6 +56,11 @@ module.exports = {
     // } else {
     //   console.log("No file uploaded");
     // }
+    if (!fileUrl) {
+      return res.status(400).json({
+        message: "File URL tidak ditemukan, pastikan file telah diupload.",
+      });
+    }
 
     const newJournal = new Journal({
       ...data,
@@ -177,6 +182,12 @@ module.exports = {
       ...req.body,
       edited: new Date(), //auto set edit date
     };
+
+    if (!fileUrl) {
+      return res.status(400).json({
+        message: "File URL tidak ditemukan, pastikan file telah diupload.",
+      });
+    }
 
     if (fileUrl) {
       console.log("File uploaded: ", fileUrl);
