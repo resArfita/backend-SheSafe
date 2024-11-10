@@ -33,17 +33,20 @@ const upload = multer({
 });
 
 // Fungsi untuk mengunggah file ke Cloudinary menggunakan stream
-function uploadToCloudinary(buffer) {
-  return new Promise((resolve, reject) => {
+async function uploadToCloudinary(buffer) {
+  try {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "identitasUser" }, // Tentukan folder Cloudinary
+      { folder: "identitasUser" },
       (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
+        if (error) throw new Error(error);
+        return result;
       }
     );
     streamifier.createReadStream(buffer).pipe(uploadStream);
-  });
+  } catch (error) {
+    console.error("Error uploading file to Cloudinary: ", error);
+    throw error;
+  }
 }
 
 // Route untuk register dengan file upload

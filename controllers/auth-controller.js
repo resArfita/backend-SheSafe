@@ -93,7 +93,7 @@ module.exports = {
     } catch (error) {
       return res
         .status(500)
-        .json({ message: "Gagal Registrasi", error: error.message });
+        .json({ message: "Gagal Registrasi", error: JSON.stringify(error) });
     }
   },
 
