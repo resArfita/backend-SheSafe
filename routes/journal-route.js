@@ -74,7 +74,7 @@ route.put("/:id", upload.single("file"), async (req, res, next) => {
 
     const result = await uploadToCloudinary(req.file.buffer);
     req.body.fileUrl = result.secure_url;
-    await addJournal(req, res);
+    await editJournal(req, res);
   } catch (error) {
     next(error);
   }
