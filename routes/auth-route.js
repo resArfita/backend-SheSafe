@@ -33,21 +33,26 @@ const upload = multer({
 });
 
 // Fungsi untuk mengunggah file ke Cloudinary menggunakan stream dan mengembalikan Promise
-function uploadToCloudinary(buffer) {
+async function uploadToCloudinary(buffer) {
   return new Promise((resolve, reject) => {
+    const timestamp = Math.floor(Date.now() / 1000); // Timestamp saat ini
+    const uploadOptions = {
+      folder: "identitasUser",
+      timestamp,
+    };
+
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "identitasUser" }, // Tentukan folder Cloudinary
+      uploadOptions,
       (error, result) => {
         if (error) {
-          reject(
-            new Error("Error uploading file to Cloudinary: " + error.message)
-          );
-        } else {
-          resolve(result); // Mengembalikan hasil upload jika berhasil
+          console.error("Error uploading file to Cloudinary:", error);
+          return reject(error); // Reject jika terjadi error
         }
+        resolve(result); // Resolve jika berhasil
       }
     );
-    streamifier.createReadStream(buffer).pipe(uploadStream); // Mengubah buffer menjadi stream dan mengirimkan ke Cloudinary
+
+    streamifier.createReadStream(buffer).pipe(uploadStream); // Upload file ke Cloudinary
   });
 }
 
