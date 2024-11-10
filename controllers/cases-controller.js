@@ -5,16 +5,20 @@ module.exports = {
   // Fungsi untuk mendapatkan semua kasus dengan pagination dan status
   getCases: async (req, res) => {
     const { status = "", page = 1, perPage = 10 } = req.query; //rename limit jadi perPage
-
+    const { userId } = req.user;
     try {
-      const cases = await Cases.find(status ? { isApproved: status } : {})
+      const cases = await Cases.find({
+        createdBy: userId,
+        ...(status ? { isApproved: status } : {}),
+      })
         .sort({ created: "desc" })
         .skip((page - 1) * perPage)
         .limit(Number(perPage));
 
-      const totalCases = await Cases.countDocuments(
-        status ? { isApproved: status } : {}
-      );
+      const totalCases = await Cases.countDocuments({
+        createdBy: userId,
+        ...(status ? { isApproved: status } : {}),
+      });
 
       res.status(200).json({
         message: "Berhasil mendapatkan semua kasus",
