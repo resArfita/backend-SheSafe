@@ -32,21 +32,23 @@ const upload = multer({
   },
 });
 
-// Fungsi untuk mengunggah file ke Cloudinary menggunakan stream
-async function uploadToCloudinary(buffer) {
-  try {
+// Fungsi untuk mengunggah file ke Cloudinary menggunakan stream dan mengembalikan Promise
+function uploadToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "identitasUser" },
+      { folder: "identitasUser" }, // Tentukan folder Cloudinary
       (error, result) => {
-        if (error) throw new Error(error);
-        return result;
+        if (error) {
+          reject(
+            new Error("Error uploading file to Cloudinary: " + error.message)
+          );
+        } else {
+          resolve(result); // Mengembalikan hasil upload jika berhasil
+        }
       }
     );
-    streamifier.createReadStream(buffer).pipe(uploadStream);
-  } catch (error) {
-    console.error("Error uploading file to Cloudinary: ", error);
-    throw error;
-  }
+    streamifier.createReadStream(buffer).pipe(uploadStream); // Mengubah buffer menjadi stream dan mengirimkan ke Cloudinary
+  });
 }
 
 // Route untuk register dengan file upload
@@ -56,11 +58,16 @@ route.post(
   upload.single("fileIdentity"),
   async (req, res, next) => {
     try {
-      const result = await uploadToCloudinary(req.file.buffer);
-      req.body.fileUrl = result.secure_url;
-      await regist(req, res);
+      // Pastikan file ada sebelum mencoba mengupload
+      if (!req.file) {
+        return res.status(400).json({ message: "File identity is required." });
+      }
+
+      const result = await uploadToCloudinary(req.file.buffer); // Upload file ke Cloudinary
+      req.body.fileUrl = result.secure_url; // Dapatkan URL file setelah upload selesai
+      await regist(req, res); // Lanjutkan dengan registrasi pengguna
     } catch (error) {
-      next(error);
+      next(error); // Mengarahkan ke handler error middleware
     }
   }
 );
