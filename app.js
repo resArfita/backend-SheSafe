@@ -35,11 +35,6 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  res.setHeader("Vary", "Origin");
-  next();
-});
-
 app.options("*", cors());
 
 app.use(express.json());
