@@ -13,7 +13,7 @@ module.exports = {
 
   regist: async (req, res) => {
     // Mendapatkan data dari body request
-    const { fullName, email, gender, password, birthDate, fileUrl, username } = req.body;
+    const { fullName, email, gender, password, birthDate, fileUrl } = req.body;
 
     // Validasi input
     if (!fullName) {
@@ -77,7 +77,6 @@ module.exports = {
         isValidated: "validated", //sementara
         fileIdentity: fileUrl, // Menggunakan URL dari Cloudinary
         password: hashedPassword,
-        username,
       });
 
       await newUser.save();
@@ -88,7 +87,6 @@ module.exports = {
           fullName: newUser.fullName,
           email: newUser.email,
           gender: newUser.gender,
-          username: newUser.username,
           fileIdentity: newUser.fileIdentity,
         },
       });

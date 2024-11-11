@@ -4,11 +4,10 @@ const Schema = mongoose.Schema;
 const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  username: { type: String, required: true },
   password: { type: String, required: true },
   gender: { type: String, required: true },
   birthDate: { type: Date, required: true },
-  fileIdentity: { type: String, required: true }, //identitasfile
+  fileIdentity: { type: String, required: false, default: null }, //identitasfile
   avatar: { type: String, default: "null" }, //fotoprofil
   isValidated: { type: String },
   validated: { type: Date, default: null }, // Default to null if not immediately validated
