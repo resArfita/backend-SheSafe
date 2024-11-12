@@ -1,10 +1,18 @@
 require("dotenv").config();
 const express = require("express");
+const { validateToken } = require("../middleware/auth"); // include validateToken ke checkAuth
 const multer = require("multer");
 const path = require("path");
-const { regist, login, logout } = require("../controllers/auth-controller");
-const streamifier = require("streamifier");
+const {
+  regist,
+  login,
+  // getUser,
+  logout,
+  checkAuth,
+} = require("../controllers/auth-controller");
+
 const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 // Konfigurasi Cloudinary
 cloudinary.config({
@@ -13,71 +21,43 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-// Konfigurasi Multer untuk menyimpan file dalam buffer
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // Batas ukuran file 2MB
-  fileFilter: (req, file, cb) => {
-    const allowedExtensions = /jpg|jpeg|png/;
-    const extname = allowedExtensions.test(
-      path.extname(file.originalname).toLowerCase()
-    );
-    const mimetype = allowedExtensions.test(file.mimetype);
-    if (mimetype && extname) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed"));
-    }
+// Konfigurasi Multer-Storage-Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "identitasUser",
+    public_id: (req, file) => Date.now() + path.extname(file.originalname),
   },
 });
 
-// Fungsi untuk mengunggah file ke Cloudinary menggunakan stream dan mengembalikan Promise
-async function uploadToCloudinary(buffer) {
-  return new Promise((resolve, reject) => {
-    const timestamp = Math.floor(Date.now() / 1000); // Timestamp saat ini
-    const uploadOptions = {
-      folder: "identitasUser",
-      timestamp,
-    };
+const fileFilter = (req, file, cb) => {
+  const allowedExtensions = /jpg|jpeg|png/;
+  const extname = allowedExtensions.test(
+    path.extname(file.originalname).toLowerCase()
+  );
+  const mimetype = allowedExtensions.test(file.mimetype);
 
-    const uploadStream = cloudinary.uploader.upload_stream(
-      uploadOptions,
-      (error, result) => {
-        if (error) {
-          console.error("Error uploading file to Cloudinary:", error);
-          return reject(error); // Reject jika terjadi error
-        }
-        resolve(result); // Resolve jika berhasil
-      }
-    );
-
-    streamifier.createReadStream(buffer).pipe(uploadStream); // Upload file ke Cloudinary
-  });
-}
-
-// Route untuk register dengan file upload
-const route = express.Router();
-route.post(
-  "/register",
-  upload.single("fileIdentity"),
-  async (req, res, next) => {
-    try {
-      // Pastikan file ada sebelum mencoba mengupload
-      if (!req.file) {
-        return res.status(400).json({ message: "File identity is required." });
-      }
-
-      const result = await uploadToCloudinary(req.file.buffer); // Upload file ke Cloudinary
-      req.body.fileUrl = result.secure_url; // Dapatkan URL file setelah upload selesai
-      await regist(req, res); // Lanjutkan dengan registrasi pengguna
-    } catch (error) {
-      next(error); // Mengarahkan ke handler error middleware
-    }
+  if (mimetype && extname) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image and video files are allowed"));
   }
-);
+};
 
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 2 * 1024 * 1024,
+  },
+  fileFilter: fileFilter,
+});
+
+const route = express.Router();
+route.post("/register", upload.single("fileIdentity"), regist);
 route.post("/login", login);
 route.post("/logout", logout);
+
+// route.get("/users", getUser);
+route.get("/check", validateToken, checkAuth);
 
 module.exports = route;

@@ -5,66 +5,80 @@ const jwt = require("jsonwebtoken");
 
 module.exports = {
   checkAuth: (req, res) => {
-    // console.log("req.res", req.res) // check user data
     if (req.user) {
       return res.status(200).json({ isAuthenticated: true, user: req.user });
-    } else{
-      return res.status(401).json({ isAuthenticated: false });
     }
+    return res.status(401).json({ isAuthenticated: false });
   },
 
   regist: async (req, res) => {
-    // const data = req.body
-    const { fullName, email, gender, password, birthDate } = req.body; //tambahbirthDate
+    // Mendapatkan data dari body request
+    const { fullName, email, gender, password, birthDate, fileUrl } = req.body;
 
     // Validasi input
     if (!fullName) {
-      return res.json({ message: "fullname tidak boleh kosong" });
+      return res
+        .status(400)
+        .json({ message: "Nama lengkap tidak boleh kosong" });
     }
 
     if (!email) {
-      return res.json({ message: "email tidak boleh kosong" });
+      return res.status(400).json({ message: "Email tidak boleh kosong" });
     }
 
     if (!gender) {
-      return res.json({ message: "gender tidak boleh kosong" });
+      return res
+        .status(400)
+        .json({ message: "Jenis kelamin tidak boleh kosong" });
     }
 
     if (!password) {
-      return res.json({ message: "password tidak boleh kosong" });
+      return res.status(400).json({ message: "Password tidak boleh kosong" });
     }
 
     if (!birthDate) {
-      return res.json({ message: "tanggal lahir tidak boleh kosong" });
+      return res
+        .status(400)
+        .json({ message: "Tanggal lahir tidak boleh kosong" });
     }
 
-    if (!req.file) {
-      return res.json({ message: "Bukti Identitas tidak boleh kosong" });
+    // Validasi email (Format)
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Email tidak valid" });
     }
 
-    //password hashing
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    // console.log(data)
+    // Validasi file identitas
+    if (!fileUrl) {
+      return res
+        .status(400)
+        .json({ message: "Bukti identitas tidak boleh kosong" });
+    }
 
     try {
       // Cek apakah email sudah digunakan
       const checkEmail = await User.findOne({ email });
-
       if (checkEmail) {
-        return res.json({
+        return res.status(400).json({
           message: "Email sudah digunakan, silahkan gunakan Email yang lain",
         });
       }
 
+      // Hash password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Simpan data pengguna baru
       const newUser = new User({
         fullName,
         email,
         gender,
         birthDate,
-        fileIdentity: req.file.path,
-        password: hashedPassword, // Use hashed password
+        isValidated: "validated", //sementara
+        fileIdentity: fileUrl, // Menggunakan URL dari Cloudinary
+        password: hashedPassword,
       });
+
       await newUser.save();
 
       return res.status(201).json({
@@ -78,8 +92,8 @@ module.exports = {
       });
     } catch (error) {
       return res
-        .status(400)
-        .json({ message: "Gagal Registrasi", error: error.message });
+        .status(500)
+        .json({ message: "Gagal Registrasi", error: JSON.stringify(error) });
     }
   },
 
@@ -96,14 +110,13 @@ module.exports = {
     //CheckAccount
     if (user.isValidated !== "validated") {
       return res
-        .status(404)
+        .status(403)
         .json({ message: "Akun anda belum tervalidasi identitasnya" });
     }
 
     //if user exist -> compare pass w/ bcrypt
     const checkPassword = await bcrypt.compare(data.password, user.password);
     if (!checkPassword) return res.status(401).json({ message: "Gagal login" });
-
     //token
     try {
       const token = jwt.sign(
@@ -113,8 +126,10 @@ module.exports = {
 
       res.cookie("tokenUser", token, {
         httpOnly: true,
-        secure: false,
-        sameSite: true,
+        secure: process.env.NODE_ENV === "production",
+        // secure: false,
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        // Partitioned: true,
         // { expiresIn: "1h" }
       });
 
@@ -128,7 +143,11 @@ module.exports = {
   },
 
   logout: (req, res) => {
-    res.clearCookie("tokenUser");
+    res.clearCookie("tokenUser", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    });
     res.status(201).json({ message: "berhasil Logout" });
   },
 };

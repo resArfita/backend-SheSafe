@@ -7,7 +7,7 @@ module.exports = {
   getJournalByIdUser: async (req, res) => {
     //rename nama function
     const { userId } = req.user; //tambah req.user
-    const { page = 1, perPage = 5, sort = "desc" } = req.query; //rename limit to perPage
+    const { page = 1, perPage = 10, sort = "desc" } = req.query; //rename limit to perPage
     const sortOrder = sort === "asc" ? 1 : -1;
 
     try {
@@ -18,7 +18,7 @@ module.exports = {
         .skip((page - 1) * perPage)
         .limit(perPage);
 
-      const total = await Journal.countDocuments({ createdBy: userId });
+      const total = await Journal.countDocuments();
       res.json({
         message: "Berhasil mendapatkan semua Journal",
         data,
@@ -35,22 +35,12 @@ module.exports = {
   getDetailJournal: async (req, res) => {
     const { id } = req.params;
 
-    if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
-      return res.status(400).json({ message: 'Invalid journal ID' });
-    }
-
-    try {
-      const findJournal = await Journal.findById(id).populate("category", "name");
+    const findJournal = await Journal.findById(id).populate("category", "name");
 
     res.json({
       message: "Berhasil mendapatkan detail Journal by id",
       findJournal,
     });
-    } catch (error) {
-      console.error("Error fetching detail journal: ", error)
-      res.json({message: "Gagal mendapatkan detail journal"})
-    }
-    
   },
 
   // Vita: tambah kondisi createdBy dari payload req.user
